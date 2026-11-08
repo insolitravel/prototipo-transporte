@@ -1,0 +1,892 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Transporte 21 de Noviembre</title><style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,Arial,sans-serif;background:#f4efe6;color:#2b2118}
+.ag{height:10px;background:repeating-linear-gradient(90deg,#c62828 0 18px,#f9a825 18px 30px,#2e7d32 30px 46px,#6a1b9a 46px 58px,#1565c0 58px 72px)}
+#ini{max-width:520px;margin:auto;padding:20px;text-align:center}h1{margin:14px 0 4px;color:#5d2e0c}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+.g button{border:0;border-radius:16px;background:#fff;padding:18px 10px;box-shadow:0 2px 6px #0002;cursor:pointer;display:flex;flex-direction:column;gap:4px;align-items:center}
+.g span{font-size:34px}.g b{font-size:17px;color:#5d2e0c}.g small{color:#7a6b5a}
+#bar{display:none;position:fixed;top:0;left:0;right:0;height:44px;background:#5d2e0c;color:#fff;align-items:center;gap:8px;padding:0 8px;z-index:5}
+#bar button{border:0;background:#fff3;color:#fff;border-radius:8px;padding:6px 10px;font-weight:700}
+iframe{position:fixed;top:44px;left:0;width:100%;height:calc(100% - 44px);border:0;background:#fff}
+.n{font-size:12px;color:#7a6b5a;margin-top:18px}</style></head><body>
+<div id="bar"><button onclick="inicio()">← Inicio</button><b id="tit"></b></div>
+<div id="ini"><div class="ag"></div><h1>Transporte 21 de Noviembre</h1><div>Torotoro ⇄ Cochabamba</div>
+<div class="g"><button onclick="ver('cliente')"><span>🧳</span><b>Cliente</b><small>Reservar, encomiendas, reclamos</small></button><button onclick="ver('chofer')"><span>🚐</span><b>Chofer</b><small>Turno, pasajeros, encomiendas</small></button><button onclick="ver('oficina')"><span>🏢</span><b>Oficina</b><small>Fila, despacho, cobro</small></button><button onclick="ver('directiva')"><span>⚖️</span><b>Directiva</b><small>Caja, turnos, justicia</small></button></div>
+<p class="n">Prototipo de demostración. Las cuatro pantallas comparten los datos dentro de este celular.<br><button onclick="if(confirm('¿Borrar los datos de la demostración?')){Object.keys(localStorage).filter(k=>k.startsWith('t21_')).forEach(k=>localStorage.removeItem(k));location.reload()}">Reiniciar demostración</button></p></div>
+<iframe id="f_cliente" srcdoc="&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;es&quot;&gt;
+&lt;head&gt;&lt;script&gt;
+window.T21={get(k,d){try{return JSON.parse(localStorage.getItem(&#x27;t21_&#x27;+k))??d}catch(e){return d}},
+set(k,v){localStorage.setItem(&#x27;t21_&#x27;+k,JSON.stringify(v));try{parent.postMessage({t21:k},&#x27;*&#x27;)}catch(e){}},
+push(k,v){const a=this.get(k,[]);a.unshift(v);this.set(k,a)}};
+&lt;/script&gt;
+&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover&quot;&gt;
+&lt;title&gt;Transporte 21 de Noviembre – Prototipo cliente&lt;/title&gt;
+&lt;style&gt;
+:root{
+  color-scheme: light;
+  --bg:#EEF0EA; --surface:#FFFFFF; --ink:#1D2333; --muted:#5B6273; --line:#D8DBD2;
+  --red:#9B2D1F; --red-ink:#FFFFFF; --gold:#E0A417; --green:#2E6B3E; --indigo:#232B4A;
+  --free:#2E6B3E; --occ:#BEC2CB; --pend:#E0A417; --board:#232B4A; --board-ink:#F4F0E4; --board-muted:#AEB3C6;
+  --num: &quot;Bahnschrift&quot;,&quot;DIN Alternate&quot;,&quot;Roboto Condensed&quot;,&quot;Arial Narrow&quot;,system-ui,sans-serif;
+  --txt: system-ui,-apple-system,&quot;Segoe UI&quot;,Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root{ color-scheme: dark;
+    --bg:#121520; --surface:#1B2030; --ink:#ECEEF3; --muted:#A4AABA; --line:#2F3547;
+    --red:#D0533F; --gold:#EDB63A; --green:#4FA463; --free:#4FA463; --occ:#4A5166; --pend:#EDB63A;
+    --board:#0D101B; --board-ink:#F4F0E4; --board-muted:#8E94AA; }
+}
+*{box-sizing:border-box;margin:0}
+html{height:100%}
+body{background:var(--bg);color:var(--ink);font:16px/1.45 var(--txt);
+  padding:env(safe-area-inset-top,0) 0 calc(env(safe-area-inset-bottom,0) + 76px)}
+.wrap{max-width:480px;margin:0 auto;padding:0 16px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.aguayo{height:10px;background:repeating-linear-gradient(90deg,
+  #9B2D1F 0 14px,#E0A417 14px 18px,#2E6B3E 18px 30px,#E0A417 30px 34px,#232B4A 34px 46px,#C2185B 46px 50px,#232B4A 50px 62px,#E0A417 62px 66px)}
+header{padding:16px 0 8px}
+.brand{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.brand h1{font:700 26px/1 var(--num);letter-spacing:-.5px}
+.brand p{color:var(--muted);font-size:14px;margin-top:4px}
+.views{display:flex;gap:4px;font-size:13px}
+.views span{padding:4px 8px;border-radius:6px;color:var(--muted)}
+.views .on{background:var(--ink);color:var(--bg)}
+.term{display:grid;grid-template-columns:1fr 1fr;margin:14px 0 4px;border:2px solid var(--ink);border-radius:10px;overflow:hidden}
+.term button{background:none;border:0;padding:10px 6px;font-weight:600}
+.term button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+h2{font-size:17px;margin:24px 0 10px}
+/* Tablero del carril */
+.board{background:var(--board);color:var(--board-ink);border-radius:14px;padding:18px;margin-top:14px;position:relative;overflow:hidden}
+.board .top{display:flex;justify-content:space-between;font-size:14px;color:var(--board-muted)}
+.board .movil{display:flex;align-items:baseline;gap:10px;margin:6px 0 2px}
+.board .movil b{font:700 84px/0.9 var(--num);color:var(--gold)}
+.board .movil small{font-size:15px;color:var(--board-muted)}
+.board .who{font-weight:600}
+.dots{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 6px}
+.dots i{width:18px;height:18px;border-radius:5px;background:transparent;border:2px solid var(--board-muted)}
+.dots i.o{background:var(--board-ink);border-color:var(--board-ink)}
+.dots i.p{background:var(--gold);border-color:var(--gold)}
+.board .falta{font:700 20px var(--num)}
+.board .cta{margin-top:14px;width:100%;background:var(--gold);color:#1D2333;border:0;border-radius:10px;padding:13px;font-weight:700;font-size:16px}
+.board.full .cta{background:var(--board-muted)}
+.rate{display:flex;gap:14px;font-size:14px;margin-top:6px;flex-wrap:wrap}
+.rate em{font-style:normal;color:var(--gold);font-weight:700}
+/* Salidas fijas */
+.fijas{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;scroll-snap-type:x mandatory}
+.fija{flex:0 0 132px;scroll-snap-align:start;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:left}
+.fija b{display:block;font:700 30px/1 var(--num)}
+.fija span{display:block;font-size:13px;color:var(--muted);margin-top:6px}
+.fija strong{display:block;font-size:14px;margin-top:2px;color:var(--green)}
+/* Fila */
+.fila{list-style:none;padding:0;display:grid;gap:10px}
+.car{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;grid-template-columns:auto 1fr;gap:4px 14px}
+.turno{grid-row:span 3;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;min-width:56px}
+.turno small{font-size:12px;color:var(--muted)}
+.turno b{font:700 40px/1 var(--num)}
+.car h3{font-size:16px}
+.car .meta{font-size:13px;color:var(--muted)}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.tag{font-size:12px;border:1px solid var(--line);border-radius:20px;padding:2px 9px}
+.tag.cap{border-color:var(--ink);font-weight:700}
+.estado{font-size:13px;font-weight:600;margin-top:4px}
+.estado.av{color:var(--pend)}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;background:var(--green)}
+.car .act{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.btn{border:2px solid var(--ink);background:none;border-radius:10px;padding:9px 14px;font-weight:700}
+.btn.pri{background:var(--red);border-color:var(--red);color:var(--red-ink)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+/* Nav inferior */
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);
+  padding:8px 16px calc(8px + env(safe-area-inset-bottom,0));display:flex;justify-content:center;gap:8px;z-index:5}
+nav button{flex:1;max-width:220px;border:0;background:none;padding:10px;border-radius:10px;font-weight:700;color:var(--muted)}
+nav button[aria-current=page]{background:var(--ink);color:var(--bg)}
+/* Hoja de reserva */
+.sheet-bg{position:fixed;inset:0;background:rgba(10,12,20,.55);z-index:10;display:none;align-items:flex-end;justify-content:center}
+.sheet-bg.open{display:flex}
+.sheet{background:var(--bg);width:100%;max-width:480px;max-height:92%;overflow-y:auto;border-radius:18px 18px 0 0;
+  padding:18px 16px calc(20px + env(safe-area-inset-bottom,0))}
+@media (prefers-reduced-motion:no-preference){.sheet-bg.open .sheet{animation:up .25s ease-out}}
+@keyframes up{from{transform:translateY(40px);opacity:.6}to{transform:none;opacity:1}}
+.sh-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.sh-head b{font:700 44px/1 var(--num);color:var(--red)}
+.x{border:0;background:var(--line);border-radius:50%;width:36px;height:36px;font-size:18px}
+.bus{background:var(--surface);border:2px solid var(--ink);border-radius:26px 26px 12px 12px;padding:16px 14px;margin:16px auto 8px;max-width:270px;display:grid;gap:8px}
+.row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.seat{aspect-ratio:1;border-radius:9px 9px 5px 5px;border:2px solid var(--free);background:none;font:700 15px var(--num);color:var(--free)}
+.seat.o{background:var(--occ);border-color:var(--occ);color:var(--surface);cursor:not-allowed}
+.seat.p{background:var(--pend);border-color:var(--pend);color:#1D2333;cursor:not-allowed}
+.seat.s{background:var(--red);border-color:var(--red);color:#fff}
+.drv{aspect-ratio:1;border-radius:50%;border:2px dashed var(--muted);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted)}
+.legend{display:flex;justify-content:center;gap:14px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:4px;vertical-align:-1px;border:2px solid var(--free)}
+.legend .o{background:var(--occ);border-color:var(--occ)}.legend .p{background:var(--pend);border-color:var(--pend)}.legend .s{background:var(--red);border-color:var(--red)}
+.field{margin-top:14px}
+.field label,.field .lb{display:block;font-weight:600;font-size:14px;margin-bottom:6px}
+.field input{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:inherit}
+.seg{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px}
+.seg button{border:2px solid var(--line);background:var(--surface);border-radius:10px;padding:10px;font-weight:600;text-align:left}
+.seg button[aria-pressed=true]{border-color:var(--ink)}
+.seg small{display:block;font-weight:400;font-size:12px;color:var(--muted)}
+.hint{font-size:13px;color:var(--muted);margin-top:6px}
+.ok{color:var(--green);font-weight:600}
+.confirm{width:100%;margin-top:18px;padding:14px;font-size:16px}
+/* Reservas */
+.res{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:10px}
+.res-top{display:flex;justify-content:space-between;align-items:baseline}
+.res-top b{font:700 28px var(--num)}
+.res ul{padding-left:18px;margin:8px 0;font-size:14px}
+.res .act{display:flex;gap:8px;margin-top:10px}
+.empty{text-align:center;padding:40px 10px;color:var(--muted)}
+.stars{display:flex;gap:4px}
+.stars button{border:0;background:none;font-size:30px;line-height:1;color:var(--occ);padding:2px}
+.stars button.on{color:var(--gold)}
+.toast{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom,0));transform:translateX(-50%);background:var(--ink);color:var(--bg);
+  padding:12px 16px;border-radius:12px;font-size:14px;max-width:440px;width:calc(100% - 32px);z-index:20;display:none}
+.toast.show{display:block}
+.demo{font-size:12px;color:var(--muted);text-align:center;margin:28px 0 8px}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div class=&quot;aguayo&quot; aria-hidden=&quot;true&quot;&gt;&lt;/div&gt;
+&lt;div class=&quot;wrap&quot;&gt;
+  &lt;header&gt;
+    &lt;div class=&quot;brand&quot;&gt;
+      &lt;div&gt;&lt;h1&gt;Transporte 21 de Noviembre&lt;/h1&gt;&lt;p&gt;Sindicato de transporte Torotoro – Cochabamba&lt;/p&gt;&lt;/div&gt;
+      &lt;div class=&quot;views&quot; title=&quot;Las vistas de chofer y oficina vienen en las próximas fases&quot;&gt;&lt;span class=&quot;on&quot;&gt;Cliente&lt;/span&gt;&lt;span&gt;Chofer&lt;/span&gt;&lt;span&gt;Oficina&lt;/span&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;term&quot; role=&quot;group&quot; aria-label=&quot;Terminal de salida&quot;&gt;
+      &lt;button data-t=&quot;tor&quot; aria-pressed=&quot;true&quot;&gt;Salgo de Torotoro&lt;/button&gt;
+      &lt;button data-t=&quot;cba&quot; aria-pressed=&quot;false&quot;&gt;Salgo de Cochabamba&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/header&gt;
+  &lt;main id=&quot;main&quot;&gt;&lt;/main&gt;
+  &lt;p class=&quot;demo&quot;&gt;Prototipo de demostración: los datos son de ejemplo y se borran al cerrar.&lt;/p&gt;
+&lt;/div&gt;
+
+&lt;nav&gt;
+  &lt;button id=&quot;nv-viajar&quot; aria-current=&quot;page&quot;&gt;Quiero viajar&lt;/button&gt;
+  &lt;button id=&quot;nv-enc&quot;&gt;Enviar encomienda&lt;/button&gt;
+  &lt;button id=&quot;nv-res&quot;&gt;Mis reservas&lt;/button&gt;
+&lt;/nav&gt;
+
+&lt;div class=&quot;sheet-bg&quot; id=&quot;sheetBg&quot;&gt;&lt;div class=&quot;sheet&quot; role=&quot;dialog&quot; aria-modal=&quot;true&quot; id=&quot;sheet&quot;&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&quot;toast&quot; id=&quot;toast&quot; role=&quot;status&quot;&gt;&lt;/div&gt;
+
+&lt;script&gt;
+const V = {
+  v12:{movil:12,chofer:&#x27;Fermín Choque&#x27;,placa:&#x27;2841-KTD&#x27;,front:1,rows:[3,3,3],sv:4.7,sc:4.8,n:126,eq:[&#x27;Basurero&#x27;,&#x27;Letreros&#x27;,&#x27;Ayuda a turistas&#x27;],occ:[1,2,3,5,6,8,9],pend:[]},
+  v7:{movil:7,chofer:&#x27;Eusebio Mamani&#x27;,placa:&#x27;3307-GHP&#x27;,front:2,rows:[3,3,3,3],sv:3.9,sc:4.4,n:88,eq:[&#x27;Basurero&#x27;],occ:[1,4,7],pend:[2]},
+  v21:{movil:21,chofer:&#x27;Lidia Vargas&#x27;,placa:&#x27;4190-PLK&#x27;,front:1,rows:[3,3,4],sv:4.9,sc:4.9,n:57,eq:[&#x27;Basurero&#x27;,&#x27;Letreros&#x27;,&#x27;Ayuda a turistas&#x27;],occ:[],pend:[]},
+  v3:{movil:3,chofer:&#x27;Rubén Arnez&#x27;,placa:&#x27;1975-BRS&#x27;,front:1,rows:[3,3,3,3],sv:4.2,sc:4.0,n:203,eq:[&#x27;Letreros&#x27;],occ:[],pend:[]},
+  v9:{movil:9,chofer:&#x27;Hilarión Sejas&#x27;,placa:&#x27;2218-MCZ&#x27;,front:1,rows:[3,3,3],sv:4.3,sc:4.5,n:91,eq:[&#x27;Basurero&#x27;,&#x27;Letreros&#x27;],occ:[1,2,3,4],pend:[]},
+  v18:{movil:18,chofer:&#x27;Teófilo Ayala&#x27;,placa:&#x27;3922-JRW&#x27;,front:2,rows:[3,3,3,3],sv:4.0,sc:4.2,n:110,eq:[&#x27;Letreros&#x27;],occ:[],pend:[]},
+  v4:{movil:4,chofer:&#x27;Gregorio Lazo&#x27;,placa:&#x27;1680-DNV&#x27;,front:1,rows:[3,3,4],sv:4.6,sc:4.7,n:75,eq:[&#x27;Basurero&#x27;,&#x27;Letreros&#x27;,&#x27;Ayuda a turistas&#x27;],occ:[2,3],pend:[]},
+  v15:{movil:15,chofer:&#x27;Marcelino Rocha&#x27;,placa:&#x27;3561-TXN&#x27;,front:1,rows:[3,3,3,4],sv:4.5,sc:4.6,n:144,eq:[&#x27;Basurero&#x27;,&#x27;Ayuda a turistas&#x27;],occ:[3,4,5,10,11],pend:[]},
+  v25:{movil:25,chofer:&#x27;Celestino Flores&#x27;,placa:&#x27;4402-RFA&#x27;,front:1,rows:[3,3,3],sv:4.4,sc:4.3,n:98,eq:[&#x27;Basurero&#x27;,&#x27;Letreros&#x27;],occ:[1,2,3,4,5,6,8],pend:[9]},
+  v11:{movil:11,chofer:&#x27;Severo Camacho&#x27;,placa:&#x27;2765-LQS&#x27;,front:1,rows:[3,3,3,4],sv:3.8,sc:4.1,n:132,eq:[&#x27;Letreros&#x27;],occ:[1],pend:[]}
+};
+const T = {
+  tor:{de:&#x27;Torotoro&#x27;,a:&#x27;Cochabamba&#x27;,fijas:[{h:&#x27;03:00&#x27;,v:null,pv:&#x27;v9&#x27;},{h:&#x27;04:00&#x27;,v:null,pv:&#x27;v18&#x27;},{h:&#x27;06:00&#x27;,v:null,pv:&#x27;v4&#x27;}],ultimo:&#x27;18:00&#x27;,asig:false,fila:[&#x27;v12&#x27;,&#x27;v7&#x27;,&#x27;v21&#x27;,&#x27;v3&#x27;]},
+  cba:{de:&#x27;Cochabamba&#x27;,a:&#x27;Torotoro&#x27;,fijas:[{h:&#x27;05:00&#x27;,v:null,pv:&#x27;v15&#x27;}],ultimo:&#x27;18:00&#x27;,asig:false,fila:[&#x27;v25&#x27;,&#x27;v11&#x27;]}
+};
+let term=&#x27;tor&#x27;, vista=&#x27;viajar&#x27;, bk=null, rating=null;
+let reservas=[{id:&#x27;r0&#x27;,vid:&#x27;v7&#x27;,de:&#x27;Cochabamba&#x27;,a:&#x27;Torotoro&#x27;,asientos:[{n:5,nom:&#x27;Jos&#x27;}],recojo:&#x27;Oficina&#x27;,equip:&#x27;Liviano&#x27;,hecho:true,calificado:false,fecha:&#x27;Ayer&#x27;}];
+
+const PASAJE=45, TAR={Liviano:0,Mediano:10,Pesado:20}; // precios de ejemplo
+const RUTA={tor:{sube:[&#x27;Torotoro&#x27;,&#x27;Río Caine&#x27;],baja:[&#x27;Cochabamba&#x27;,&#x27;Tarata&#x27;,&#x27;Cliza&#x27;,&#x27;Anzaldo&#x27;]},cba:{sube:[&#x27;Cochabamba&#x27;],baja:[&#x27;Torotoro&#x27;,&#x27;Río Caine&#x27;]}};
+const precio=()=&gt;!bk?PASAJE:term===&#x27;tor&#x27;?(bk.sube===&#x27;Río Caine&#x27;?40:45):(bk.baja===&#x27;Río Caine&#x27;?40:45);
+const totalBk=()=&gt;bk?bk.sel.length*precio()+TAR[bk.equip]:0;
+function pintarTramo(){const R=RUTA[term];if(!bk.sube)bk.sube=R.sube[0];if(!bk.baja)bk.baja=R.baja[0];
+ const sel=(id,arr,k)=&gt;`&lt;select id=&quot;${id}&quot; style=&quot;width:100%;padding:12px;border-radius:10px;font:inherit&quot; onchange=&quot;bk.${k}=this.value;chk()&quot;&gt;${arr.map(x=&gt;`&lt;option ${bk[k]===x?&#x27;selected&#x27;:&#x27;&#x27;}&gt;${x}&lt;/option&gt;`).join(&#x27;&#x27;)}&lt;/select&gt;`;
+ $(&#x27;#tramo&#x27;).innerHTML=`&lt;div class=&quot;field&quot; style=&quot;display:grid;grid-template-columns:1fr 1fr;gap:8px&quot;&gt;&lt;div&gt;&lt;span class=&quot;lb&quot;&gt;Subo en&lt;/span&gt;${R.sube.length&gt;1?sel(&#x27;tSube&#x27;,R.sube,&#x27;sube&#x27;):&#x27;&lt;b&gt;&#x27;+R.sube[0]+&#x27;&lt;/b&gt;&#x27;}&lt;/div&gt;&lt;div&gt;&lt;span class=&quot;lb&quot;&gt;Bajo en&lt;/span&gt;${sel(&#x27;tBaja&#x27;,R.baja,&#x27;baja&#x27;)}&lt;/div&gt;&lt;/div&gt;&lt;p class=&quot;hint&quot;&gt;${term===&#x27;tor&#x27;?&#x27;Desde Torotoro 45 Bs; desde Río Caine 40 Bs, bajes donde bajes.&#x27;:&#x27;Hasta Torotoro 45 Bs; hasta Río Caine 40 Bs.&#x27;}&lt;/p&gt;`;}
+const $=s=&gt;document.querySelector(s);
+const esc=s=&gt;String(s).replace(/[&amp;&lt;&gt;&quot;&#x27;]/g,c=&gt;({&#x27;&amp;&#x27;:&#x27;&amp;amp;&#x27;,&#x27;&lt;&#x27;:&#x27;&amp;lt;&#x27;,&#x27;&gt;&#x27;:&#x27;&amp;gt;&#x27;,&#x27;&quot;&#x27;:&#x27;&amp;quot;&#x27;,&quot;&#x27;&quot;:&#x27;&amp;#39;&#x27;}[c]));
+const cap=v=&gt;v.front+v.rows.reduce((a,b)=&gt;a+b,0);
+const libres=v=&gt;cap(v)-v.occ.length-v.pend.length;
+const cal=v=&gt;(v.sc+v.sv)/2;
+const dec=x=&gt;x.toFixed(1).replace(&#x27;.&#x27;,&#x27;,&#x27;);
+
+function toast(msg){const t=$(&#x27;#toast&#x27;);t.textContent=msg;t.classList.add(&#x27;show&#x27;);clearTimeout(t._h);t._h=setTimeout(()=&gt;t.classList.remove(&#x27;show&#x27;),3800);}
+
+function render(){
+  document.querySelectorAll(&#x27;.term button&#x27;).forEach(b=&gt;b.setAttribute(&#x27;aria-pressed&#x27;,b.dataset.t===term));
+  $(&#x27;#nv-viajar&#x27;).toggleAttribute(&#x27;aria-current&#x27;,vista===&#x27;viajar&#x27;); if(vista===&#x27;viajar&#x27;)$(&#x27;#nv-viajar&#x27;).setAttribute(&#x27;aria-current&#x27;,&#x27;page&#x27;);
+  $(&#x27;#nv-res&#x27;).toggleAttribute(&#x27;aria-current&#x27;,vista===&#x27;res&#x27;); if(vista===&#x27;res&#x27;)$(&#x27;#nv-res&#x27;).setAttribute(&#x27;aria-current&#x27;,&#x27;page&#x27;);
+  $(&#x27;#nv-enc&#x27;).toggleAttribute(&#x27;aria-current&#x27;,vista===&#x27;enc&#x27;); if(vista===&#x27;enc&#x27;)$(&#x27;#nv-enc&#x27;).setAttribute(&#x27;aria-current&#x27;,&#x27;page&#x27;);
+  $(&#x27;.term&#x27;).style.display=vista===&#x27;viajar&#x27;?&#x27;&#x27;:&#x27;none&#x27;;
+  $(&#x27;#main&#x27;).innerHTML = vista===&#x27;viajar&#x27;?viajarHTML():vista===&#x27;enc&#x27;?encHTML():reservasHTML();
+  if(vista===&#x27;enc&#x27;)encCheck();
+}
+
+let forzar=null; // demo: null=hora real, &#x27;dia&#x27;, &#x27;noche&#x27;
+function esNoche(t){if(forzar)return forzar===&#x27;noche&#x27;;const d=new Date(),m=d.getHours()*60+d.getMinutes();const [hh,mm]=t.fijas[0].h.split(&#x27;:&#x27;).map(Number);return m&gt;=18*60||m&lt;hh*60+mm;}
+function asignarSilencioso(t){t.fijas.forEach(f=&gt;{if(f.v)return;f.v=f.pv;const v=V[f.v];
+  reservas.filter(r=&gt;!r.vid&amp;&amp;r.fija===f.h&amp;&amp;r.term===term).forEach(r=&gt;{r.vid=f.v;r.asientos.forEach(a=&gt;{for(let k=1;k&lt;=cap(v);k++){if(!v.occ.includes(k)&amp;&amp;!v.pend.includes(k)){a.n=k;v.occ.push(k);break;}}});});});t.asig=true;}
+function viajarHTML(){
+  const t=T[term]; const noche=esNoche(t);
+  if(noche&amp;&amp;!t.asig)asignarSilencioso(t);
+  const hoyNoche=new Date().getHours()&gt;=18;
+  let h=`&lt;div class=&quot;hint&quot; style=&quot;display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px&quot;&gt;&lt;span&gt;${noche?&#x27;🌙 Ya salió la última de las 18:00. Próximas salidas de madrugada.&#x27;:&#x27;☀️ De día: cada móvil sale al llenarse.&#x27;}&lt;/span&gt;&lt;button class=&quot;btn&quot; onclick=&quot;forzar=${noche?&quot;&#x27;dia&#x27;&quot;:&quot;&#x27;noche&#x27;&quot;};render()&quot;&gt;Demo: ver ${noche?&#x27;de día&#x27;:&#x27;de noche&#x27;}&lt;/button&gt;&lt;/div&gt;`;
+  h+=`&lt;section class=&quot;res&quot; style=&quot;border:2px dashed #b8860b&quot;&gt;&lt;b&gt;📅 ¿Viajas más tarde u otro día?&lt;/b&gt;&lt;div class=&quot;meta&quot;&gt;Ideal para turistas después de un tour. Reservas la hora, no el móvil: la app llena un móvil a la vez y, cerca de tu hora, te asigna el móvil del carril. Como reservaste antes, eliges asiento primero.&lt;/div&gt;&lt;div class=&quot;act&quot;&gt;&lt;button class=&quot;btn pri&quot; onclick=&quot;abrirAnt()&quot;&gt;Reservar para más tarde&lt;/button&gt;&lt;/div&gt;&lt;/section&gt;`;
+  if(noche){const f=t.fijas[0],v=V[f.v];
+    let dots=&#x27;&#x27;;for(let i=1;i&lt;=cap(v);i++){dots+=`&lt;i class=&quot;${v.occ.includes(i)?&#x27;o&#x27;:v.pend.includes(i)?&#x27;p&#x27;:&#x27;&#x27;}&quot;&gt;&lt;/i&gt;`;}
+    h+=`&lt;section class=&quot;board&quot; aria-label=&quot;Próxima salida&quot;&gt;
+      &lt;div class=&quot;top&quot;&gt;&lt;span&gt;Próxima salida hacia ${t.a}&lt;/span&gt;&lt;span&gt;${hoyNoche||forzar?&#x27;Mañana &#x27;:&#x27;&#x27;}${f.h}&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;movil&quot;&gt;&lt;b&gt;${v.movil}&lt;/b&gt;&lt;small&gt;Móvil&lt;/small&gt;&lt;/div&gt;
+      &lt;div class=&quot;who&quot;&gt;${esc(v.chofer)}&lt;/div&gt;
+      &lt;div class=&quot;rate&quot;&gt;&lt;span&gt;Calificación &lt;em&gt;★ ${dec(cal(v))}&lt;/em&gt;&lt;/span&gt;&lt;span&gt;Sale a las ${f.h}, lleno o no&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;dots&quot; aria-hidden=&quot;true&quot;&gt;${dots}&lt;/div&gt;
+      &lt;div class=&quot;falta&quot;&gt;${libres(v)&gt;0?`Quedan ${libres(v)} asiento${libres(v)&gt;1?&#x27;s&#x27;:&#x27;&#x27;} libre${libres(v)&gt;1?&#x27;s&#x27;:&#x27;&#x27;}`:&#x27;Completo&#x27;}&lt;/div&gt;
+      &lt;button class=&quot;cta&quot; ${libres(v)&lt;=0?&#x27;disabled&#x27;:&#x27;&#x27;} onclick=&quot;abrir(&#x27;${f.v}&#x27;,&#x27;Salida fija ${f.h}&#x27;)&quot;&gt;${libres(v)&lt;=0?&#x27;Sin asientos libres&#x27;:&#x27;Reservar para las &#x27;+f.h}&lt;/button&gt;
+    &lt;/section&gt;`;
+    h+=`&lt;h2&gt;Otras salidas de madrugada&lt;/h2&gt;&lt;div class=&quot;fijas&quot;&gt;`;
+    t.fijas.slice(1).forEach(f=&gt;{const v=V[f.v];h+=`&lt;button class=&quot;fija&quot; onclick=&quot;abrir(&#x27;${f.v}&#x27;,&#x27;Salida fija ${f.h}&#x27;)&quot;&gt;&lt;b&gt;${f.h}&lt;/b&gt;&lt;span&gt;Móvil ${v.movil}, ★ ${dec(cal(v))}&lt;/span&gt;&lt;strong&gt;${libres(v)} de ${cap(v)} libres&lt;/strong&gt;&lt;/button&gt;`;});
+    if(t.fijas.length&lt;2)h+=`&lt;p class=&quot;empty&quot;&gt;Desde ${t.de} solo hay salida de las ${t.fijas[0].h}. Después, cada móvil sale al llenarse.&lt;/p&gt;`;
+    h+=`&lt;/div&gt;&lt;h2&gt;Fila para el día&lt;/h2&gt;&lt;p class=&quot;hint&quot; style=&quot;margin:-4px 0 10px&quot;&gt;Después de las salidas de madrugada, cada móvil sale al llenarse según este orden.&lt;/p&gt;`;
+    h+=`&lt;ol class=&quot;fila&quot;&gt;${t.fila.filter(x=&gt;!t.fijas.some(f=&gt;f.v===x)).map((id,k)=&gt;{const v=V[id];return `&lt;li&gt;&lt;b&gt;${v.movil}&lt;/b&gt; ${esc(v.chofer)} · ★ ${dec(cal(v))}&lt;/li&gt;`}).join(&#x27;&#x27;)}&lt;/ol&gt;`;
+    return h;
+  }
+  const v0=V[t.fila[0]];
+  if(v0){
+    const full=libres(v0)&lt;=0;
+    let dots=&#x27;&#x27;; for(let i=1;i&lt;=cap(v0);i++){dots+=`&lt;i class=&quot;${v0.occ.includes(i)?&#x27;o&#x27;:v0.pend.includes(i)?&#x27;p&#x27;:&#x27;&#x27;}&quot;&gt;&lt;/i&gt;`;}
+    h+=`&lt;section class=&quot;board${full?&#x27; full&#x27;:&#x27;&#x27;}&quot; aria-label=&quot;Móvil en el carril&quot;&gt;
+      &lt;div class=&quot;top&quot;&gt;&lt;span&gt;En el carril, hacia ${t.a}&lt;/span&gt;&lt;span&gt;Turno 1&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;movil&quot;&gt;&lt;b&gt;${v0.movil}&lt;/b&gt;&lt;small&gt;Móvil&lt;/small&gt;&lt;/div&gt;
+      &lt;div class=&quot;who&quot;&gt;${esc(v0.chofer)}&lt;/div&gt;
+      &lt;div class=&quot;rate&quot;&gt;&lt;span&gt;Calificación &lt;em&gt;★ ${dec(cal(v0))}&lt;/em&gt;&lt;/span&gt;&lt;span&gt;${v0.n} viajes&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;dots&quot; aria-hidden=&quot;true&quot;&gt;${dots}&lt;/div&gt;
+      &lt;div class=&quot;falta&quot;&gt;${full?&#x27;Completo: sale ahora&#x27;:`Sale al llenarse · faltan ${libres(v0)} pasajero${libres(v0)&gt;1?&#x27;s&#x27;:&#x27;&#x27;}`}&lt;/div&gt;
+      ${!full&amp;&amp;libres(v0)===1?&#x27;&lt;div class=&quot;estado av&quot;&gt;Avisamos a los que reservaron: prepárense, está por salir.&lt;/div&gt;&#x27;:&#x27;&#x27;}
+      &lt;button class=&quot;cta&quot; ${full?&#x27;disabled&#x27;:&#x27;&#x27;} onclick=&quot;abrir(&#x27;${t.fila[0]}&#x27;,&#x27;Turno 1, sale al llenarse&#x27;)&quot;&gt;${full?&#x27;Sin asientos libres&#x27;:&#x27;Reservar en este móvil&#x27;}&lt;/button&gt;
+    &lt;/section&gt;`;
+  }
+  h+=`&lt;h2&gt;Salidas fijas&lt;/h2&gt;&lt;div class=&quot;fijas&quot;&gt;`;
+  t.fijas.forEach((f,i)=&gt;{
+    if(!f.v){const n=reservas.filter(r=&gt;!r.vid&amp;&amp;r.fija===f.h&amp;&amp;r.term===term).reduce((a,r)=&gt;a+r.asientos.length,0);
+      h+=`&lt;button class=&quot;fija&quot; onclick=&quot;abrirPA(${i})&quot;&gt;&lt;b&gt;${f.h}&lt;/b&gt;&lt;span&gt;Móvil ${V[f.pv].movil} · provisional&lt;/span&gt;&lt;strong&gt;${n?n+&#x27; reservados&#x27;:&#x27;Reserva tu lugar&#x27;}&lt;/strong&gt;&lt;/button&gt;`;}
+    else{const v=V[f.v];h+=`&lt;button class=&quot;fija&quot; onclick=&quot;abrir(&#x27;${f.v}&#x27;,&#x27;Salida fija ${f.h}&#x27;)&quot;&gt;&lt;b&gt;${f.h}&lt;/b&gt;&lt;span&gt;Móvil ${v.movil}, ★ ${dec(cal(v))}&lt;/span&gt;&lt;strong&gt;${libres(v)} de ${cap(v)} libres&lt;/strong&gt;&lt;/button&gt;`;}
+  });
+  {
+    h+=`&lt;div class=&quot;fija&quot;&gt;&lt;b&gt;18:00&lt;/b&gt;&lt;span&gt;Última del día, sale lleno o no&lt;/span&gt;&lt;strong&gt;Va el que le toque en la lista&lt;/strong&gt;&lt;/div&gt;`;}
+  h+=`&lt;/div&gt;`;
+  h+=`&lt;p class=&quot;hint&quot;&gt;Se sabe desde que sale el penúltimo. Puede cambiar si alguien toma un contrato; se confirma después de las 18:00 y te avisamos.&lt;/p&gt;`;
+  h+=`&lt;h2&gt;Fila del día&lt;/h2&gt;`+`&lt;p class=&quot;hint&quot; style=&quot;margin:-4px 0 10px&quot;&gt;Después de ${term===&#x27;tor&#x27;?&#x27;las 6:00&#x27;:&#x27;las 5:00&#x27;} cada móvil sale al llenarse, hasta la última salida fija de las 18:00. La lista sigue por orden de llegada aunque dure varios días.&lt;/p&gt;`;
+  if(t.fila.length&lt;2){h+=`&lt;p class=&quot;empty&quot;&gt;No hay más móviles anotados en ${t.de}.&lt;/p&gt;`;return h;}
+  h+=`&lt;ol class=&quot;fila&quot;&gt;`;
+  t.fila.slice(1).forEach((id,i)=&gt;{const v=V[id];const k=i+2;const usados=v.occ.length+v.pend.length;
+    h+=`&lt;li class=&quot;car&quot;&gt;&lt;div class=&quot;turno&quot;&gt;&lt;small&gt;Turno&lt;/small&gt;&lt;b&gt;${k}&lt;/b&gt;&lt;/div&gt;
+      &lt;div&gt;&lt;h3&gt;Móvil ${v.movil}&lt;/h3&gt;&lt;div class=&quot;meta&quot;&gt;${esc(v.chofer)}, placa ${v.placa}&lt;/div&gt;&lt;/div&gt;
+      &lt;div class=&quot;rate&quot;&gt;&lt;span&gt;Calificación &lt;em&gt;★ ${dec(cal(v))}&lt;/em&gt;&lt;/span&gt;&lt;/div&gt;
+      &lt;div&gt;&lt;div class=&quot;tags&quot;&gt;&lt;span class=&quot;tag cap&quot;&gt;${cap(v)} asientos&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;estado ${k&lt;=3?&#x27;av&#x27;:&#x27;&#x27;}&quot;&gt;${k&lt;=3?&#x27;Avisado: se alista para el carril&#x27;:&#x27;En fila&#x27;}&lt;/div&gt;
+      &lt;div class=&quot;bar&quot;&gt;&lt;i style=&quot;width:${usados/cap(v)*100}%&quot;&gt;&lt;/i&gt;&lt;/div&gt;&lt;/div&gt;
+      &lt;div class=&quot;act&quot;&gt;&lt;span class=&quot;meta&quot;&gt;${libres(v)} de ${cap(v)} libres&lt;/span&gt;&lt;button class=&quot;btn&quot; onclick=&quot;abrir(&#x27;${id}&#x27;,&#x27;Turno ${k}&#x27;)&quot;&gt;Reservar&lt;/button&gt;&lt;/div&gt;
+    &lt;/li&gt;`;});
+  return h+`&lt;/ol&gt;`;
+}
+
+function estadoRes(r){
+  if(r.hecho)return &#x27;Viaje realizado &#x27;+r.fecha.toLowerCase();
+  if(r.ant)return `📅 ${r.dia} a las ${r.hora} · prefieres ${r.pref.toLowerCase()}. Móvil por asignar: te avisamos cerca de la hora.`;
+  if(!r.vid)return `Salida fija ${r.fija}: móvil por asignar. Te avisamos al asignarse.`;
+  for(const k in T){const i=T[k].fila.indexOf(r.vid);if(i===0)return &#x27;En el carril: alístate, sale al llenarse&#x27;;if(i&gt;0)return `Turno ${i+1} en la fila`;
+    const f=T[k].fijas.find(f=&gt;f.v===r.vid);if(f)return `Salida fija a las ${f.h}, asignado y confirmado`;}
+  return &#x27;En viaje&#x27;;
+}
+function reservasHTML(){
+  if(!reservas.length&amp;&amp;!encs.length)return `&lt;p class=&quot;empty&quot;&gt;Todavía no tienes reservas. Toca “Quiero viajar” para elegir tu móvil y asiento.&lt;/p&gt;`;
+  let h=encListHTML()+(reservas.length?&#x27;&lt;h2&gt;Mis reservas de viaje&lt;/h2&gt;&#x27;:&#x27;&#x27;);
+  reservas.forEach(r=&gt;{const v=V[r.vid];
+    h+=`&lt;article class=&quot;res&quot;&gt;&lt;div class=&quot;res-top&quot;&gt;&lt;b&gt;${v?&#x27;Móvil &#x27;+v.movil:r.ant?&#x27;Reserva para más tarde&#x27;:&#x27;Salida &#x27;+r.fija}&lt;/b&gt;&lt;span class=&quot;meta&quot;&gt;${r.sube||r.de} a ${r.baja||r.a}&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;estado ${r.hecho?&#x27;&#x27;:&#x27;av&#x27;}&quot;&gt;${estadoRes(r)}&lt;/div&gt;
+      &lt;ul&gt;${r.asientos.map(a=&gt;`&lt;li&gt;${a.n?&#x27;Asiento &#x27;+a.n:&#x27;Pasajero&#x27;}: ${esc(a.nom)}&lt;/li&gt;`).join(&#x27;&#x27;)}&lt;/ul&gt;
+      &lt;div class=&quot;meta&quot;&gt;Recojo: ${r.recojo}. Equipaje: ${r.equip}. Total: ${r.total||&#x27;—&#x27;} Bs, pago al chofer al viajar. Si te cobran más, márcalo al calificar.&lt;/div&gt;
+      &lt;div class=&quot;act&quot;&gt;${r.hecho?(r.calificado?&#x27;&lt;span class=&quot;ok&quot;&gt;Gracias por calificar&lt;/span&gt;&#x27;:`&lt;button class=&quot;btn pri&quot; onclick=&quot;calificar(&#x27;${r.id}&#x27;)&quot;&gt;Calificar viaje&lt;/button&gt;`):`${r.ant?`&lt;button class=&quot;btn pri&quot; onclick=&quot;asignarAnt(&#x27;${r.id}&#x27;)&quot;&gt;Demo: llegó la hora&lt;/button&gt; `:&#x27;&#x27;}&lt;button class=&quot;btn&quot; onclick=&quot;cancelar(&#x27;${r.id}&#x27;)&quot;&gt;Cancelar reserva&lt;/button&gt;`}&lt;/div&gt;
+    &lt;/article&gt;`;});
+  return h;
+}
+
+/* Reserva */
+function abrir(vid,etiqueta){
+  bk={vid,etiqueta,sel:[],nombres:{},equip:&#x27;Liviano&#x27;,recojo:&#x27;Oficina&#x27;,ubic:false,cel:&#x27;&#x27;};
+  const v=V[vid];
+  $(&#x27;#sheet&#x27;).innerHTML=`&lt;div class=&quot;sh-head&quot;&gt;&lt;div&gt;&lt;b&gt;Móvil ${v.movil}&lt;/b&gt;&lt;div class=&quot;meta&quot;&gt;${etiqueta}. ${esc(v.chofer)}, ${cap(v)} asientos&lt;/div&gt;
+      &lt;div class=&quot;rate&quot;&gt;&lt;span&gt;Calificación &lt;em&gt;★ ${dec(cal(v))}&lt;/em&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;
+      &lt;button class=&quot;x&quot; aria-label=&quot;Cerrar&quot; onclick=&quot;cerrar()&quot;&gt;✕&lt;/button&gt;&lt;/div&gt;
+    &lt;div class=&quot;bus&quot; id=&quot;bus&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;legend&quot;&gt;&lt;span&gt;&lt;i&gt;&lt;/i&gt;Libre&lt;/span&gt;&lt;span&gt;&lt;i class=&quot;o&quot;&gt;&lt;/i&gt;Ocupado&lt;/span&gt;&lt;span&gt;&lt;i class=&quot;p&quot;&gt;&lt;/i&gt;Apartado&lt;/span&gt;&lt;span&gt;&lt;i class=&quot;s&quot;&gt;&lt;/i&gt;Tu elección&lt;/span&gt;&lt;/div&gt;
+    &lt;div id=&quot;tramo&quot;&gt;&lt;/div&gt;
+    &lt;div id=&quot;nombres&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;field&quot;&gt;&lt;span class=&quot;lb&quot;&gt;Equipaje&lt;/span&gt;&lt;div class=&quot;seg&quot; id=&quot;segEq&quot;&gt;
+      &lt;button aria-pressed=&quot;true&quot; data-v=&quot;Liviano&quot;&gt;Liviano&lt;small&gt;Mochila · gratis&lt;/small&gt;&lt;/button&gt;
+      &lt;button aria-pressed=&quot;false&quot; data-v=&quot;Mediano&quot;&gt;Mediano&lt;small&gt;Bulto · ${TAR.Mediano} Bs&lt;/small&gt;&lt;/button&gt;
+      &lt;button aria-pressed=&quot;false&quot; data-v=&quot;Pesado&quot;&gt;Pesado&lt;small&gt;Quintal · ${TAR.Pesado} Bs&lt;/small&gt;&lt;/button&gt;&lt;/div&gt;&lt;p class=&quot;hint&quot;&gt;Precios fijos del sindicato, por bulto.&lt;/p&gt;&lt;/div&gt;
+    &lt;div class=&quot;field&quot;&gt;&lt;span class=&quot;lb&quot;&gt;¿Dónde te recogemos?&lt;/span&gt;&lt;div class=&quot;seg&quot; id=&quot;segRec&quot;&gt;
+      &lt;button aria-pressed=&quot;true&quot; data-v=&quot;Oficina&quot;&gt;Voy a la oficina&lt;small&gt;Terminal de ${T[term].de}&lt;/small&gt;&lt;/button&gt;
+      &lt;button aria-pressed=&quot;false&quot; data-v=&quot;Casa&quot;&gt;Recójanme&lt;small&gt;Envío mi ubicación&lt;/small&gt;&lt;/button&gt;&lt;/div&gt;
+      &lt;div id=&quot;ubic&quot;&gt;&lt;/div&gt;&lt;/div&gt;
+    &lt;div class=&quot;field&quot;&gt;&lt;label for=&quot;cel&quot;&gt;Tu celular&lt;/label&gt;&lt;input id=&quot;cel&quot; inputmode=&quot;numeric&quot; maxlength=&quot;8&quot; placeholder=&quot;Ej. 71234567&quot; oninput=&quot;bk.cel=this.value.replace(/\\D/g,&#x27;&#x27;);this.value=bk.cel;chk()&quot;&gt;
+      &lt;p class=&quot;hint&quot;&gt;Te avisamos aquí cuando tu móvil esté por llenarse.&lt;/p&gt;&lt;/div&gt;
+    &lt;div id=&quot;total&quot; style=&quot;font-weight:800;font-size:17px;margin-top:14px;text-align:center&quot;&gt;&lt;/div&gt;
+    &lt;button class=&quot;btn pri confirm&quot; id=&quot;conf&quot; disabled onclick=&quot;confirmar()&quot;&gt;Confirmar reserva&lt;/button&gt;
+    &lt;p class=&quot;hint&quot; style=&quot;text-align:center&quot;&gt;Pagas al chofer al subir. Si no vas a viajar, cancela para liberar el asiento.&lt;/p&gt;`;
+  segs(); pintarBus(); pintarNombres();
+  $(&#x27;#sheetBg&#x27;).classList.add(&#x27;open&#x27;);
+}
+function segs(){
+  if($(&#x27;#tramo&#x27;))pintarTramo();
+  [[&#x27;#segEq&#x27;,&#x27;equip&#x27;],[&#x27;#segRec&#x27;,&#x27;recojo&#x27;]].forEach(([s,k])=&gt;{
+    document.querySelectorAll(s+&#x27; button&#x27;).forEach(b=&gt;b.onclick=()=&gt;{bk[k]=b.dataset.v;
+      document.querySelectorAll(s+&#x27; button&#x27;).forEach(x=&gt;x.setAttribute(&#x27;aria-pressed&#x27;,x===b));
+      if(k===&#x27;recojo&#x27;)pintarUbic(); chk();});});
+  pintarUbic();
+}
+function pintarUbic(){
+  $(&#x27;#ubic&#x27;).innerHTML = bk.recojo!==&#x27;Casa&#x27;?&#x27;&#x27;:bk.ubic?&#x27;&lt;p class=&quot;hint ok&quot;&gt;Ubicación marcada ✓&lt;/p&gt;&#x27;
+    :&#x27;&lt;button class=&quot;btn&quot; style=&quot;margin-top:10px&quot; onclick=&quot;bk.ubic=true;pintarUbic();chk()&quot;&gt;Enviar mi ubicación&lt;/button&gt;&#x27;;
+}
+function pintarBus(){
+  const v=V[bk.vid];let n=1,h=&#x27;&#x27;;
+  const seat=()=&gt;{const k=n++;const c=v.occ.includes(k)?&#x27;o&#x27;:v.pend.includes(k)?&#x27;p&#x27;:bk.sel.includes(k)?&#x27;s&#x27;:&#x27;&#x27;;
+    return `&lt;button class=&quot;seat ${c}&quot; ${c===&#x27;o&#x27;||c===&#x27;p&#x27;?&#x27;disabled&#x27;:&#x27;&#x27;} aria-label=&quot;Asiento ${k}${c===&#x27;o&#x27;?&#x27;, ocupado&#x27;:c===&#x27;p&#x27;?&#x27;, apartado&#x27;:c===&#x27;s&#x27;?&#x27;, elegido&#x27;:&#x27;, libre&#x27;}&quot; onclick=&quot;tocar(${k})&quot;&gt;${k}&lt;/button&gt;`;};
+  const gap=&#x27;&lt;span&gt;&lt;/span&gt;&#x27;;
+  h+=`&lt;div class=&quot;row&quot;&gt;&lt;span class=&quot;drv&quot;&gt;Chofer&lt;/span&gt;${gap}${v.front===2?seat()+seat():gap+seat()}&lt;/div&gt;`;
+  v.rows.forEach(c=&gt;{h+=`&lt;div class=&quot;row&quot;&gt;${c===3?seat()+seat()+gap+seat():seat()+seat()+seat()+seat()}&lt;/div&gt;`;});
+  $(&#x27;#bus&#x27;).innerHTML=h;
+}
+function tocar(k){const i=bk.sel.indexOf(k);if(i&gt;=0){bk.sel.splice(i,1);delete bk.nombres[k];}else bk.sel.push(k);
+  bk.sel.sort((a,b)=&gt;a-b);pintarBus();pintarNombres();chk();}
+function pintarNombres(){
+  $(&#x27;#nombres&#x27;).innerHTML=bk.sel.length?`&lt;div class=&quot;field&quot;&gt;&lt;span class=&quot;lb&quot;&gt;Nombre de cada pasajero&lt;/span&gt;${bk.sel.map(k=&gt;
+    `&lt;input style=&quot;margin-bottom:8px&quot; placeholder=&quot;Asiento ${k}: nombre&quot; aria-label=&quot;Nombre para el asiento ${k}&quot; value=&quot;${esc(bk.nombres[k]||&#x27;&#x27;)}&quot; oninput=&quot;bk.nombres[${k}]=this.value;chk()&quot;&gt;`).join(&#x27;&#x27;)}&lt;/div&gt;`
+    :&#x27;&lt;p class=&quot;hint&quot; style=&quot;text-align:center&quot;&gt;Toca uno o varios asientos libres.&lt;/p&gt;&#x27;;
+}
+function chk(){if($(&#x27;#total&#x27;)&amp;&amp;bk){const n=bk.sel.length;$(&#x27;#total&#x27;).textContent=n?`Total a pagar: ${totalBk()} Bs (${n} × ${precio()} pasaje${TAR[bk.equip]?&#x27; + &#x27;+TAR[bk.equip]+&#x27; equipaje&#x27;:&#x27;&#x27;})`:&#x27;&#x27;;}
+const ok=bk.sel.length&amp;&amp;bk.sel.every(k=&gt;(bk.nombres[k]||&#x27;&#x27;).trim())&amp;&amp;/^\d{8}$/.test(bk.cel)&amp;&amp;(bk.recojo===&#x27;Oficina&#x27;||bk.ubic);$(&#x27;#conf&#x27;).disabled=!ok;}
+function cerrar(){$(&#x27;#sheetBg&#x27;).classList.remove(&#x27;open&#x27;);bk=null;rating=null;}
+function pubPas(vid,asientos,eq,rec,sube,baja){if(window.T21&amp;&amp;V[vid]&amp;&amp;V[vid].movil==12)asientos.forEach(a=&gt;T21.push(&#x27;pas12&#x27;,{a:a.n,n:a.nom,eq,r:rec,st:&#x27;apartado&#x27;,sube,baja,app:1}))}
+function confirmar(){
+  if(bk.pa){reservas.unshift({id:&#x27;r&#x27;+Date.now(),vid:null,fija:bk.fija,term:term,de:T[term].de,a:T[term].a,
+      asientos:bk.sel.map(k=&gt;({n:null,nom:bk.nombres[k].trim()})),recojo:bk.recojo===&#x27;Casa&#x27;?&#x27;en tu ubicación&#x27;:&#x27;en la oficina&#x27;,equip:bk.equip,sube:bk.sube,baja:bk.baja,total:totalBk(),hecho:false});
+    const h=bk.fija;cerrar();render();toast(`Reserva confirmada para las ${h}. Te avisamos qué móvil te toca.`);return;}
+  const v=V[bk.vid];v.occ.push(...bk.sel);
+  reservas.unshift({id:&#x27;r&#x27;+Date.now(),vid:bk.vid,de:T[term].de,a:T[term].a,asientos:bk.sel.map(k=&gt;({n:k,nom:bk.nombres[k].trim()})),
+    recojo:bk.recojo===&#x27;Casa&#x27;?&#x27;en tu ubicación&#x27;:&#x27;en la oficina&#x27;,equip:bk.equip,sube:bk.sube,baja:bk.baja,total:totalBk(),hecho:false});
+  pubPas(bk.vid,bk.sel.map(k=&gt;({n:k,nom:bk.nombres[k].trim()})),bk.equip,bk.recojo===&#x27;Casa&#x27;?&#x27;Casa&#x27;:&#x27;Oficina&#x27;,bk.sube,bk.baja);
+  const m=v.movil;cerrar();render();
+  const t=T[term];
+  if(t.fila[0]&amp;&amp;V[t.fila[0]]===v&amp;&amp;libres(v)&lt;=0){
+    toast(`Reserva confirmada. El móvil ${m} está completo y sale ahora.`);
+    setTimeout(()=&gt;{t.fila.shift();render();toast(`Móvil ${m} en camino. Pasa al carril el siguiente turno.`);},3000);
+  }else toast(`Reserva confirmada en el móvil ${m}. Te avisamos cuando esté por llenarse.`);
+}
+function cancelar(id){const r=reservas.find(x=&gt;x.id===id);const v=V[r.vid]||{occ:[]};
+  v.occ=v.occ.filter(n=&gt;!r.asientos.some(a=&gt;a.n===n));reservas=reservas.filter(x=&gt;x.id!==id);render();toast(&#x27;Reserva cancelada. El asiento quedó libre para otro pasajero.&#x27;);}
+
+
+/* Reserva anticipada por horario */
+function abrirAnt(){const R=RUTA[term];
+ $(&#x27;#sheet&#x27;).innerHTML=`&lt;div class=&quot;sh-head&quot;&gt;&lt;div&gt;&lt;b&gt;Reservar para más tarde&lt;/b&gt;&lt;div class=&quot;meta&quot;&gt;Desde ${T[term].de}. Reservas la hora, no el móvil.&lt;/div&gt;&lt;/div&gt;&lt;button class=&quot;x&quot; aria-label=&quot;Cerrar&quot; onclick=&quot;cerrar()&quot;&gt;✕&lt;/button&gt;&lt;/div&gt;
+ &lt;div class=&quot;field&quot;&gt;&lt;span class=&quot;lb&quot;&gt;¿Qué día?&lt;/span&gt;&lt;select id=&quot;aDia&quot; style=&quot;width:100%;padding:8px&quot;&gt;&lt;option&gt;Hoy&lt;/option&gt;&lt;option&gt;Mañana&lt;/option&gt;&lt;option&gt;Pasado mañana&lt;/option&gt;&lt;/select&gt;&lt;/div&gt;
+ &lt;div class=&quot;field&quot;&gt;&lt;span class=&quot;lb&quot;&gt;¿A qué hora más o menos?&lt;/span&gt;&lt;input id=&quot;aHora&quot; type=&quot;time&quot; value=&quot;15:00&quot; style=&quot;width:100%;padding:8px&quot;&gt;&lt;/div&gt;
+ &lt;div class=&quot;field&quot;&gt;&lt;span class=&quot;lb&quot;&gt;Subo en / Bajo en&lt;/span&gt;&lt;div style=&quot;display:flex;gap:6px&quot;&gt;&lt;select id=&quot;aSube&quot; style=&quot;flex:1;padding:8px&quot;&gt;${R.sube.map(x=&gt;`&lt;option&gt;${x}&lt;/option&gt;`).join(&#x27;&#x27;)}&lt;/select&gt;&lt;select id=&quot;aBaja&quot; style=&quot;flex:1;padding:8px&quot;&gt;${R.baja.map(x=&gt;`&lt;option&gt;${x}&lt;/option&gt;`).join(&#x27;&#x27;)}&lt;/select&gt;&lt;/div&gt;&lt;/div&gt;
+ &lt;div class=&quot;field&quot;&gt;&lt;span class=&quot;lb&quot;&gt;Nombres de los pasajeros (uno por línea)&lt;/span&gt;&lt;textarea id=&quot;aNom&quot; rows=&quot;3&quot; style=&quot;width:100%;padding:8px&quot; placeholder=&quot;Ej.: Anna Müller&amp;#10;Paul Müller&quot;&gt;&lt;/textarea&gt;&lt;/div&gt;
+ &lt;div class=&quot;field&quot;&gt;&lt;span class=&quot;lb&quot;&gt;Asiento que prefieres&lt;/span&gt;&lt;select id=&quot;aPref&quot; style=&quot;width:100%;padding:8px&quot;&gt;&lt;option&gt;Adelante&lt;/option&gt;&lt;option&gt;Al medio&lt;/option&gt;&lt;option&gt;Atrás&lt;/option&gt;&lt;option&gt;Me da igual&lt;/option&gt;&lt;/select&gt;&lt;/div&gt;
+ &lt;div class=&quot;field&quot;&gt;&lt;span class=&quot;lb&quot;&gt;Equipaje&lt;/span&gt;&lt;select id=&quot;aEq&quot; style=&quot;width:100%;padding:8px&quot;&gt;&lt;option&gt;Liviano&lt;/option&gt;&lt;option&gt;Mediano&lt;/option&gt;&lt;option&gt;Pesado&lt;/option&gt;&lt;/select&gt;&lt;/div&gt;
+ &lt;div class=&quot;field&quot;&gt;&lt;span class=&quot;lb&quot;&gt;¿Dónde te recogemos?&lt;/span&gt;&lt;select id=&quot;aRec&quot; style=&quot;width:100%;padding:8px&quot;&gt;&lt;option&gt;En la oficina&lt;/option&gt;&lt;option&gt;En mi hotel / casa (envío ubicación)&lt;/option&gt;&lt;/select&gt;&lt;/div&gt;
+ &lt;div class=&quot;field&quot;&gt;&lt;span class=&quot;lb&quot;&gt;Celular o WhatsApp&lt;/span&gt;&lt;input id=&quot;aCel&quot; inputmode=&quot;tel&quot; placeholder=&quot;+591 ...&quot; style=&quot;width:100%;padding:8px&quot;&gt;&lt;/div&gt;
+ &lt;p class=&quot;hint&quot;&gt;Pagas al chofer al viajar. Si no puedes ir, cancela para no recibir una falta.&lt;/p&gt;
+ &lt;button class=&quot;btn pri confirm&quot; onclick=&quot;guardarAnt()&quot;&gt;Reservar&lt;/button&gt;`;
+ $(&#x27;#sheetBg&#x27;).classList.add(&#x27;open&#x27;);}
+function guardarAnt(){const g=id=&gt;document.getElementById(id).value;const noms=g(&#x27;aNom&#x27;).split(&#x27;\n&#x27;).map(s=&gt;s.trim()).filter(Boolean);
+ if(!noms.length){toast(&#x27;Escribe al menos un nombre.&#x27;);return}
+ const sube=g(&#x27;aSube&#x27;),baja=g(&#x27;aBaja&#x27;);const pr=term===&#x27;tor&#x27;?(sube===&#x27;Río Caine&#x27;?40:45):(baja===&#x27;Río Caine&#x27;?40:45);
+ reservas.unshift({id:&#x27;r&#x27;+Date.now(),ant:true,vid:null,dia:g(&#x27;aDia&#x27;),hora:g(&#x27;aHora&#x27;),pref:g(&#x27;aPref&#x27;),term,de:T[term].de,a:T[term].a,sube,baja,
+  asientos:noms.map(n=&gt;({n:null,nom:n})),recojo:g(&#x27;aRec&#x27;).toLowerCase(),equip:g(&#x27;aEq&#x27;),total:noms.length*pr+noms.length*TAR[g(&#x27;aEq&#x27;)],hecho:false});
+ cerrar();vista=&#x27;res&#x27;;render();toast(`Reservado para ${g(&#x27;aDia&#x27;).toLowerCase()} a las ${g(&#x27;aHora&#x27;)}. Cerca de la hora te decimos tu móvil y asiento.`);}
+function asignarAnt(id){const r=reservas.find(x=&gt;x.id===id);const vid=T[r.term].fila[0];const v=V[vid];
+ const orden=[];for(let k=1;k&lt;=cap(v);k++)orden.push(k);if(r.pref===&#x27;Atrás&#x27;)orden.reverse();else if(r.pref===&#x27;Al medio&#x27;)orden.sort((a,b)=&gt;Math.abs(a-cap(v)/2)-Math.abs(b-cap(v)/2));
+ const libresK=orden.filter(k=&gt;!v.occ.includes(k)&amp;&amp;!v.pend.includes(k));
+ if(libresK.length&lt;r.asientos.length){toast(&#x27;El móvil del carril no tiene espacio: pasa al siguiente.&#x27;);return}
+ r.asientos.forEach((a,j)=&gt;{a.n=libresK[j];v.occ.push(libresK[j])});r.vid=vid;r.ant=false;pubPas(vid,r.asientos,r.equip,r.recojo.includes(&#x27;hotel&#x27;)?&#x27;Casa&#x27;:&#x27;Oficina&#x27;,r.sube,r.baja);render();
+ toast(`¡Llegó tu hora! Vas en el móvil ${v.movil}, asiento${r.asientos.length&gt;1?&#x27;s&#x27;:&#x27;&#x27;} ${r.asientos.map(a=&gt;a.n).join(&#x27;, &#x27;)}.`);}
+
+/* Salida fija por asignar */
+function abrirPA(i){
+  const f=T[term].fijas[i];
+  bk={pa:true,fija:f.h,sel:[1],nombres:{},equip:&#x27;Liviano&#x27;,recojo:&#x27;Oficina&#x27;,ubic:false,cel:&#x27;&#x27;};
+  $(&#x27;#sheet&#x27;).innerHTML=`&lt;div class=&quot;sh-head&quot;&gt;&lt;div&gt;&lt;b&gt;${f.h}&lt;/b&gt;&lt;div class=&quot;meta&quot;&gt;Salida fija desde ${T[term].de}. Móvil por asignar&lt;/div&gt;&lt;/div&gt;
+      &lt;button class=&quot;x&quot; aria-label=&quot;Cerrar&quot; onclick=&quot;cerrar()&quot;&gt;✕&lt;/button&gt;&lt;/div&gt;
+    &lt;p class=&quot;hint&quot;&gt;El móvil y tu asiento se asignan cuando sale el último del día (${T[term].ultimo}). Te avisamos por la app.&lt;/p&gt;
+    &lt;div id=&quot;tramo&quot;&gt;&lt;/div&gt;
+    &lt;div id=&quot;nombres&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;field&quot;&gt;&lt;span class=&quot;lb&quot;&gt;Equipaje&lt;/span&gt;&lt;div class=&quot;seg&quot; id=&quot;segEq&quot;&gt;
+      &lt;button aria-pressed=&quot;true&quot; data-v=&quot;Liviano&quot;&gt;Liviano&lt;small&gt;Mochila · gratis&lt;/small&gt;&lt;/button&gt;
+      &lt;button aria-pressed=&quot;false&quot; data-v=&quot;Mediano&quot;&gt;Mediano&lt;small&gt;Bulto · ${TAR.Mediano} Bs&lt;/small&gt;&lt;/button&gt;
+      &lt;button aria-pressed=&quot;false&quot; data-v=&quot;Pesado&quot;&gt;Pesado&lt;small&gt;Quintal · ${TAR.Pesado} Bs&lt;/small&gt;&lt;/button&gt;&lt;/div&gt;&lt;p class=&quot;hint&quot;&gt;Precios fijos del sindicato, por bulto.&lt;/p&gt;&lt;/div&gt;
+    &lt;div class=&quot;field&quot;&gt;&lt;span class=&quot;lb&quot;&gt;¿Dónde te recogemos?&lt;/span&gt;&lt;div class=&quot;seg&quot; id=&quot;segRec&quot;&gt;
+      &lt;button aria-pressed=&quot;true&quot; data-v=&quot;Oficina&quot;&gt;Voy a la oficina&lt;small&gt;Terminal de ${T[term].de}&lt;/small&gt;&lt;/button&gt;
+      &lt;button aria-pressed=&quot;false&quot; data-v=&quot;Casa&quot;&gt;Recójanme&lt;small&gt;Envío mi ubicación&lt;/small&gt;&lt;/button&gt;&lt;/div&gt;
+      &lt;div id=&quot;ubic&quot;&gt;&lt;/div&gt;&lt;/div&gt;
+    &lt;div class=&quot;field&quot;&gt;&lt;label for=&quot;cel&quot;&gt;Tu celular&lt;/label&gt;&lt;input id=&quot;cel&quot; inputmode=&quot;numeric&quot; maxlength=&quot;8&quot; placeholder=&quot;Ej. 71234567&quot; oninput=&quot;bk.cel=this.value.replace(/\\D/g,&#x27;&#x27;);this.value=bk.cel;chk()&quot;&gt;&lt;/div&gt;
+    &lt;div id=&quot;total&quot; style=&quot;font-weight:800;font-size:17px;margin-top:14px;text-align:center&quot;&gt;&lt;/div&gt;
+    &lt;button class=&quot;btn pri confirm&quot; id=&quot;conf&quot; disabled onclick=&quot;confirmar()&quot;&gt;Confirmar reserva&lt;/button&gt;`;
+  segs(); pintarNombresPA(); $(&#x27;#sheetBg&#x27;).classList.add(&#x27;open&#x27;);
+}
+function pintarNombresPA(){
+  $(&#x27;#nombres&#x27;).innerHTML=`&lt;div class=&quot;field&quot;&gt;&lt;span class=&quot;lb&quot;&gt;Nombre de cada pasajero&lt;/span&gt;${bk.sel.map(k=&gt;
+    `&lt;input style=&quot;margin-bottom:8px&quot; placeholder=&quot;Pasajero ${k}: nombre&quot; aria-label=&quot;Nombre del pasajero ${k}&quot; value=&quot;${esc(bk.nombres[k]||&#x27;&#x27;)}&quot; oninput=&quot;bk.nombres[${k}]=this.value;chk()&quot;&gt;`).join(&#x27;&#x27;)}
+    &lt;button class=&quot;btn&quot; onclick=&quot;bk.sel.push(bk.sel.length+1);pintarNombresPA();chk()&quot;&gt;Agregar pasajero&lt;/button&gt;&lt;/div&gt;`;
+}
+function asignar(){
+  const t=T[term]; const msg=[];
+  t.fijas.forEach(f=&gt;{f.v=f.pv;const v=V[f.v];msg.push(`${f.h} móvil ${v.movil}`);
+    reservas.filter(r=&gt;!r.vid&amp;&amp;r.fija===f.h&amp;&amp;r.term===term).forEach(r=&gt;{
+      r.vid=f.v; r.asientos.forEach(a=&gt;{for(let k=1;k&lt;=cap(v);k++){if(!v.occ.includes(k)&amp;&amp;!v.pend.includes(k)){a.n=k;v.occ.push(k);break;}}});});
+  });
+  t.asig=true; render();
+  toast(`Salió el de las ${t.ultimo}. Asignados y confirmados: ${msg.join(&#x27;, &#x27;)}. Avisamos a los pasajeros.`);
+}
+
+/* Calificación: estrellas + lo bueno + lo malo + observaciones (tabulable) */
+const BUENO=[&#x27;Buen trato&#x27;,&#x27;Puntual&#x27;,&#x27;Vehículo limpio&#x27;,&#x27;Cómodo&#x27;,&#x27;Manejo seguro&#x27;,&#x27;Ayudó con el equipaje&#x27;];
+const MALO=[&#x27;Cobro de más&#x27;,&#x27;Mal trato / grosero&#x27;,&#x27;Vehículo sucio&#x27;,&#x27;Música muy fuerte&#x27;,&#x27;Manejo brusco o peligroso&#x27;,&#x27;Impuntual&#x27;,&#x27;Paró demasiado&#x27;,&#x27;Asientos muy pequeños&#x27;,&#x27;Muy apretado / sin espacio para pasar&#x27;,&#x27;Sin ventana o sin dónde apoyarse&#x27;,&#x27;Llevó más pasajeros de la cuenta&#x27;,&#x27;Chofer con aliento a alcohol&#x27;,&#x27;Usó el celular manejando&#x27;,&#x27;No respetó mi asiento&#x27;,&#x27;Maltrató mi equipaje o encomienda&#x27;,&#x27;Otro&#x27;];
+function chips(lista,tipo){return `&lt;div class=&quot;tags&quot;&gt;${lista.map((c,i)=&gt;`&lt;button class=&quot;tag&quot; style=&quot;cursor:pointer;border:1px solid #bbb&quot; id=&quot;${tipo}${i}&quot; onclick=&quot;toggleChip(&#x27;${tipo}&#x27;,${i})&quot;&gt;${c}&lt;/button&gt;`).join(&#x27;&#x27;)}&lt;/div&gt;`;}
+function calificar(id){rating={id,val:0,bueno:new Set(),malo:new Set()};const r=reservas.find(x=&gt;x.id===id);
+  $(&#x27;#sheet&#x27;).innerHTML=`&lt;div class=&quot;sh-head&quot;&gt;&lt;div&gt;&lt;b&gt;Móvil ${V[r.vid].movil}&lt;/b&gt;&lt;div class=&quot;meta&quot;&gt;¿Cómo fue tu viaje con ${esc(V[r.vid].chofer)}?&lt;/div&gt;&lt;/div&gt;
+    &lt;button class=&quot;x&quot; aria-label=&quot;Cerrar&quot; onclick=&quot;cerrar()&quot;&gt;✕&lt;/button&gt;&lt;/div&gt;
+    &lt;div class=&quot;field&quot;&gt;&lt;span class=&quot;lb&quot;&gt;Calificación general&lt;/span&gt;&lt;div class=&quot;stars&quot; id=&quot;st0&quot;&gt;${[1,2,3,4,5].map(s=&gt;`&lt;button aria-label=&quot;${s} estrellas&quot; onclick=&quot;estrella(${s})&quot;&gt;★&lt;/button&gt;`).join(&#x27;&#x27;)}&lt;/div&gt;&lt;/div&gt;
+    &lt;div class=&quot;field&quot;&gt;&lt;span class=&quot;lb&quot;&gt;¿Qué estuvo bien?&lt;/span&gt;${chips(BUENO,&#x27;b&#x27;)}&lt;/div&gt;
+    &lt;div class=&quot;field&quot;&gt;&lt;span class=&quot;lb&quot;&gt;¿Qué estuvo mal?&lt;/span&gt;${chips(MALO,&#x27;m&#x27;)}&lt;/div&gt;
+    &lt;div class=&quot;field&quot;&gt;&lt;span class=&quot;lb&quot;&gt;Observaciones (opcional)&lt;/span&gt;&lt;textarea id=&quot;obs&quot; rows=&quot;3&quot; style=&quot;width:100%;border-radius:8px;padding:8px&quot; placeholder=&quot;Cuéntanos algo más...&quot;&gt;&lt;/textarea&gt;&lt;/div&gt;
+    &lt;label class=&quot;field&quot; style=&quot;display:flex;gap:8px;align-items:flex-start&quot;&gt;&lt;input type=&quot;checkbox&quot; id=&quot;recl&quot;&gt; &lt;span&gt;&lt;b&gt;Quiero hacer un reclamo formal&lt;/b&gt;&lt;br&gt;&lt;span class=&quot;hint&quot;&gt;Le llega al secretario de justicia del sindicato, que lo revisa y responde.&lt;/span&gt;&lt;/span&gt;&lt;/label&gt;
+    &lt;p class=&quot;hint&quot;&gt;Si el móvil no era como en la app (otros asientos), puedes reportarlo al sindicato.&lt;/p&gt;
+    &lt;button class=&quot;btn pri confirm&quot; id=&quot;envR&quot; disabled onclick=&quot;enviarR()&quot;&gt;Enviar calificación&lt;/button&gt;
+    &lt;button class=&quot;btn confirm&quot; onclick=&quot;cerrar();toast(&#x27;Reporte enviado al sindicato.&#x27;)&quot;&gt;Reportar diferencia con el móvil&lt;/button&gt;`;
+  $(&#x27;#sheetBg&#x27;).classList.add(&#x27;open&#x27;);}
+function toggleChip(t,i){if(t===&#x27;m&#x27;&amp;&amp;MALO[i]===&#x27;Cobro de más&#x27;&amp;&amp;!rating.malo.has(i)){const x=prompt(&#x27;¿Cuánto te cobraron en total (Bs)?&#x27;);if(x)rating.cobrado=x;}
+const set=t===&#x27;b&#x27;?rating.bueno:rating.malo;const el=document.getElementById(t+i);
+  if(set.has(i)){set.delete(i);el.style.background=&#x27;&#x27;;el.style.color=&#x27;&#x27;;}else{set.add(i);el.style.background=t===&#x27;b&#x27;?&#x27;#1f7a3a&#x27;:&#x27;#b3261e&#x27;;el.style.color=&#x27;#fff&#x27;;}}
+function estrella(s){rating.val=s;document.querySelectorAll(&#x27;#st0 button&#x27;).forEach((b,j)=&gt;b.classList.toggle(&#x27;on&#x27;,j&lt;s));$(&#x27;#envR&#x27;).disabled=false;}
+window.t21Sync=function(){if(!window.T21)return;const vis=T21.get(&#x27;reclVisto&#x27;,[]);T21.get(&#x27;resp&#x27;,[]).forEach(x=&gt;{if(!vis.includes(x.id)){vis.push(x.id);toast(&#x27;⚖️ Respuesta a tu reclamo &#x27;+x.id+&#x27;: &#x27;+x.r)}});T21.set(&#x27;reclVisto&#x27;,vis)};
+window.addEventListener(&#x27;storage&#x27;,()=&gt;window.t21Sync());
+function enviarR(){const rc=document.getElementById(&#x27;recl&#x27;)&amp;&amp;document.getElementById(&#x27;recl&#x27;).checked;const rv=reservas.find(x=&gt;x.id===rating.id);rv.calificado=true;const cod=&#x27;R-&#x27;+Math.floor(1000+Math.random()*9000);
+ if(rc&amp;&amp;window.T21){const mv=rv.vid&amp;&amp;V[rv.vid]?V[rv.vid].movil:&#x27;?&#x27;;T21.push(&#x27;recl&#x27;,{id:cod,m:mv,f:&#x27;Hoy &#x27;+new Date().toLocaleTimeString(&#x27;es-BO&#x27;,{hour:&#x27;2-digit&#x27;,minute:&#x27;2-digit&#x27;}),t:[...rating.malo].map(i=&gt;MALO[i]).join(&#x27; · &#x27;)||&#x27;Reclamo&#x27;,d:(document.getElementById(&#x27;obs&#x27;).value||&#x27;&#x27;)+(rating.cobrado?&#x27; (Cobrado: &#x27;+rating.cobrado+&#x27; Bs)&#x27;:&#x27;&#x27;),e:&#x27;nuevo&#x27;,app:1})}
+ cerrar();render();toast(rc?&#x27;Reclamo enviado al secretario de justicia. Código &#x27;+cod+&#x27;. Te avisaremos su respuesta.&#x27;:&#x27;Gracias. Tu calificación ayuda a otros pasajeros a elegir.&#x27;);}
+
+document.querySelectorAll(&#x27;.term button&#x27;).forEach(b=&gt;b.onclick=()=&gt;{term=b.dataset.t;render();});
+$(&#x27;#nv-viajar&#x27;).onclick=()=&gt;{vista=&#x27;viajar&#x27;;render();};
+
+/* Encomiendas del cliente */
+const PARADAS=[&#x27;Torotoro (terminal)&#x27;,&#x27;Rancho Pampa&#x27;,&#x27;Anzaldo&#x27;,&#x27;Sacabamba&#x27;,&#x27;Acasio&#x27;,&#x27;Carasi&#x27;,&#x27;Otra parada registrada&#x27;];
+const TIPOS=[&#x27;Sobre / documento&#x27;,&#x27;Bolsa&#x27;,&#x27;Caja&#x27;,&#x27;Quintal&#x27;,&#x27;Verduras&#x27;,&#x27;Ropa / zapatos&#x27;,&#x27;Celular / electrónico&#x27;,&#x27;Otro&#x27;];
+const EST=[&#x27;Registrada: entrégala al chofer&#x27;,&#x27;Recibida por el chofer&#x27;,&#x27;En camino&#x27;,&#x27;Entregada ✓&#x27;];
+let encs=[], ef={tipos:new Set(),fragil:false};
+function encHTML(){return `&lt;h2&gt;Enviar encomienda&lt;/h2&gt;
+ &lt;p class=&quot;hint&quot;&gt;Regístrala aquí y entrégala en persona al chofer. Él la confirma y le saca foto.&lt;/p&gt;
+ &lt;div class=&quot;field&quot;&gt;&lt;span class=&quot;lb&quot;&gt;¿Qué envías? (puedes marcar varios)&lt;/span&gt;&lt;div class=&quot;tags&quot;&gt;${TIPOS.map((t,i)=&gt;`&lt;button class=&quot;tag&quot; style=&quot;cursor:pointer;padding:8px 12px&quot; id=&quot;tp${i}&quot; onclick=&quot;encTipo(${i})&quot;&gt;${t}&lt;/button&gt;`).join(&#x27;&#x27;)}&lt;/div&gt;&lt;/div&gt;
+ &lt;div class=&quot;field&quot;&gt;&lt;label for=&quot;eDesc&quot;&gt;Descripción corta&lt;/label&gt;&lt;input id=&quot;eDesc&quot; placeholder=&quot;Ej.: bolsa con ropa y zapatos&quot; oninput=&quot;encCheck()&quot;&gt;&lt;/div&gt;
+ &lt;div class=&quot;field&quot;&gt;&lt;span class=&quot;lb&quot;&gt;¿Cuánto aguanta?&lt;/span&gt;&lt;select id=&quot;ePlz&quot; style=&quot;width:100%;padding:12px;border-radius:10px&quot;&gt;&lt;option value=&quot;4&quot;&gt;🔴 ⚡ Entrega rápida (carne, pollo, torta, comida): va en el primer móvil, entregar en 4 horas&lt;/option&gt;&lt;option value=&quot;24&quot; selected&gt;🟡 Normal (verduras, ropa): hasta 24 horas&lt;/option&gt;&lt;option value=&quot;72&quot;&gt;🟢 Aguanta (sobres, máquinas): hasta 3 días&lt;/option&gt;&lt;/select&gt;&lt;/div&gt;
+ &lt;div class=&quot;field&quot;&gt;&lt;label for=&quot;eVal&quot;&gt;Valor declarado (Bs)&lt;/label&gt;&lt;input id=&quot;eVal&quot; inputmode=&quot;numeric&quot; placeholder=&quot;Ej.: 300&quot; oninput=&quot;encCheck()&quot;&gt;&lt;span class=&quot;hint&quot;&gt;🔒 El chofer no ve este valor; solo la oficina y la directiva. Declara el valor real: si se pierde o se malogra por culpa del servicio, se devuelve ese monto. Lo que vale mucho (joyas, dinero, celulares) se entrega en la oficina, va sellado y con foto.&lt;/span&gt;&lt;/div&gt;
+ &lt;div class=&quot;field&quot;&gt;&lt;label&gt;&lt;input type=&quot;checkbox&quot; id=&quot;eFrag&quot; style=&quot;width:auto&quot;&gt; Es frágil&lt;/label&gt;&lt;/div&gt;
+ &lt;div class=&quot;field&quot;&gt;&lt;label for=&quot;ePar&quot;&gt;Parada de destino&lt;/label&gt;&lt;select id=&quot;ePar&quot; style=&quot;width:100%;padding:12px;border-radius:10px&quot;&gt;${PARADAS.map(x=&gt;`&lt;option&gt;${x}&lt;/option&gt;`).join(&#x27;&#x27;)}&lt;/select&gt;&lt;/div&gt;
+ &lt;div class=&quot;field&quot;&gt;&lt;label for=&quot;eEnv&quot;&gt;Tu nombre (envía)&lt;/label&gt;&lt;input id=&quot;eEnv&quot; oninput=&quot;encCheck()&quot;&gt;&lt;/div&gt;
+ &lt;div class=&quot;field&quot;&gt;&lt;label for=&quot;eEnvC&quot;&gt;Tu celular&lt;/label&gt;&lt;input id=&quot;eEnvC&quot; inputmode=&quot;numeric&quot; maxlength=&quot;8&quot; oninput=&quot;encCheck()&quot;&gt;&lt;/div&gt;
+ &lt;div class=&quot;field&quot;&gt;&lt;label for=&quot;eRec&quot;&gt;Quién recoge&lt;/label&gt;&lt;input id=&quot;eRec&quot; oninput=&quot;encCheck()&quot;&gt;&lt;/div&gt;
+ &lt;div class=&quot;field&quot;&gt;&lt;label for=&quot;eRecC&quot;&gt;Celular de quien recoge&lt;/label&gt;&lt;input id=&quot;eRecC&quot; inputmode=&quot;numeric&quot; maxlength=&quot;8&quot; oninput=&quot;encCheck()&quot;&gt;&lt;/div&gt;
+ &lt;div class=&quot;field&quot;&gt;&lt;label&gt;&lt;input type=&quot;checkbox&quot; id=&quot;eDecl&quot; style=&quot;width:auto&quot; onchange=&quot;encCheck()&quot;&gt; Declaro que no envío sustancias controladas, armas ni nada prohibido. El chofer u oficina puede pedir revisarla.&lt;/label&gt;&lt;/div&gt;
+ &lt;button class=&quot;btn pri confirm&quot; id=&quot;eOk&quot; disabled onclick=&quot;encGuardar()&quot;&gt;Registrar encomienda&lt;/button&gt;`;}
+function encTipo(i){ef.tipos.has(i)?ef.tipos.delete(i):ef.tipos.add(i);const b=document.getElementById(&#x27;tp&#x27;+i);b.style.background=ef.tipos.has(i)?&#x27;var(--ink)&#x27;:&#x27;&#x27;;b.style.color=ef.tipos.has(i)?&#x27;var(--surface)&#x27;:&#x27;&#x27;;encCheck();}
+function encCheck(){const v=id=&gt;($(&#x27;#&#x27;+id)||{}).value||&#x27;&#x27;;const ok=ef.tipos.size&amp;&amp;v(&#x27;eEnv&#x27;).trim()&amp;&amp;/^\d{8}$/.test(v(&#x27;eEnvC&#x27;))&amp;&amp;v(&#x27;eRec&#x27;).trim()&amp;&amp;/^\d{8}$/.test(v(&#x27;eRecC&#x27;))&amp;&amp;/^\d+$/.test(v(&#x27;eVal&#x27;))&amp;&amp;$(&#x27;#eDecl&#x27;)&amp;&amp;$(&#x27;#eDecl&#x27;).checked;if($(&#x27;#eOk&#x27;))$(&#x27;#eOk&#x27;).disabled=!ok;}
+function encGuardar(){encs.unshift({id:&#x27;e&#x27;+Date.now(),cod:&#x27;E-&#x27;+String(Math.floor(Math.random()*9000)+1000),tipos:[...ef.tipos].map(i=&gt;TIPOS[i]),desc:$(&#x27;#eDesc&#x27;).value.trim(),fragil:$(&#x27;#eFrag&#x27;).checked,parada:$(&#x27;#ePar&#x27;).value,rec:$(&#x27;#eRec&#x27;).value.trim(),recC:$(&#x27;#eRecC&#x27;).value,est:0,plz:+$(&#x27;#ePlz&#x27;).value,val:+$(&#x27;#eVal&#x27;).value,pin:String(Math.floor(1000+Math.random()*9000))});
+ {const e=encs[0];if(window.T21)T21.push(&#x27;encs&#x27;,{p:e.parada,t:e.tipos.join(&#x27; · &#x27;)+(e.fragil?&#x27; · Frágil&#x27;:&#x27;&#x27;),env:$(&#x27;#eEnv&#x27;).value.trim()+&#x27; · &#x27;+$(&#x27;#eEnvC&#x27;).value,rec:e.rec+&#x27; · &#x27;+e.recC,recibida:false,ok:false,plz:e.plz,quedan:e.plz*60,val:e.val,pin:e.pin,cod:e.cod,app:1})}
+ ef={tipos:new Set()};vista=&#x27;res&#x27;;render();toast(&#x27;Registrada. Enviamos a quien recoge su código de entrega por SMS.&#x27;);}
+function encProblema(id){const e=encs.find(x=&gt;x.id===id);const t=document.getElementById(&#x27;pb&#x27;+id).value;e.inc=&#x27;Reclamo enviado al secretario de justicia: &#x27;+t+&#x27;. Valor declarado &#x27;+e.val+&#x27; Bs.&#x27;;render();toast(&#x27;Reclamo registrado. La directiva decide quién paga.&#x27;);}
+function encAvanzar(id){const e=encs.find(x=&gt;x.id===id);if(e.est&lt;3)e.est++;render();}
+function encListHTML(){if(!encs.length)return &#x27;&#x27;;return &#x27;&lt;h2&gt;Mis encomiendas&lt;/h2&gt;&#x27;+encs.map(e=&gt;`&lt;article class=&quot;res&quot;&gt;&lt;div class=&quot;res-top&quot;&gt;&lt;b&gt;${e.cod} · ${esc(e.tipos.join(&#x27;, &#x27;))}${e.fragil?&#x27; · Frágil&#x27;:&#x27;&#x27;}&lt;/b&gt;&lt;span class=&quot;meta&quot;&gt;a ${esc(e.parada)}&lt;/span&gt;&lt;/div&gt;
+ &lt;div class=&quot;estado ${e.est==3?&#x27;&#x27;:&#x27;av&#x27;}&quot;&gt;${EST[e.est]}&lt;/div&gt;&lt;div class=&quot;meta&quot;&gt;${e.desc?esc(e.desc)+&#x27;. &#x27;:&#x27;&#x27;}Recoge: ${esc(e.rec)} (${e.recC}).&lt;/div&gt;${e.plz?`&lt;div class=&quot;meta&quot;&gt;${e.plz==4?&#x27;🔴 ⚡ Entrega rápida: va en el primer móvil, entregar en 4 h&#x27;:e.plz==24?&#x27;🟡 Normal: hasta 24 h&#x27;:&#x27;🟢 Aguanta: hasta 3 días&#x27;} · Valor declarado: ${e.val} Bs · el chofer no lo ve&lt;br&gt;🔑 Código de entrega para ${esc(e.rec)}: &lt;b&gt;${e.pin}&lt;/b&gt; (le llega por SMS; el chofer lo pide al entregar)&lt;/div&gt;`:&#x27;&#x27;}${e.inc?`&lt;div class=&quot;estado&quot; style=&quot;color:#b3261e&quot;&gt;⚠️ ${esc(e.inc)}&lt;/div&gt;`:&#x27;&#x27;}
+ &lt;div class=&quot;act&quot;&gt;${e.est&lt;3?`&lt;button class=&quot;btn&quot; onclick=&quot;encAvanzar(&#x27;${e.id}&#x27;)&quot;&gt;Demo: siguiente estado&lt;/button&gt;`:&#x27;&#x27;}${!e.inc?`&lt;select id=&quot;pb${e.id}&quot; style=&quot;padding:8px&quot;&gt;&lt;option&gt;Se perdió&lt;/option&gt;&lt;option&gt;Llegó dañada&lt;/option&gt;&lt;option&gt;Llegó tarde y se malogró&lt;/option&gt;&lt;option&gt;La entregaron a otra persona&lt;/option&gt;&lt;/select&gt; &lt;button class=&quot;btn&quot; onclick=&quot;encProblema(&#x27;${e.id}&#x27;)&quot;&gt;Reportar problema&lt;/button&gt;`:&#x27;&#x27;}&lt;/div&gt;&lt;/article&gt;`).join(&#x27;&#x27;);}
+$(&#x27;#nv-enc&#x27;).onclick=()=&gt;{vista=&#x27;enc&#x27;;ef={tipos:new Set()};render();};
+$(&#x27;#nv-res&#x27;).onclick=()=&gt;{vista=&#x27;res&#x27;;render();};
+$(&#x27;#sheetBg&#x27;).onclick=e=&gt;{if(e.target.id===&#x27;sheetBg&#x27;)cerrar();};
+render();
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+" style="display:none"></iframe>
+<iframe id="f_chofer" srcdoc="&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;es&quot;&gt;&lt;head&gt;&lt;script&gt;
+window.T21={get(k,d){try{return JSON.parse(localStorage.getItem(&#x27;t21_&#x27;+k))??d}catch(e){return d}},
+set(k,v){localStorage.setItem(&#x27;t21_&#x27;+k,JSON.stringify(v));try{parent.postMessage({t21:k},&#x27;*&#x27;)}catch(e){}},
+push(k,v){const a=this.get(k,[]);a.unshift(v);this.set(k,a)}};
+&lt;/script&gt;&lt;meta charset=&quot;UTF-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;
+&lt;title&gt;Transporte 21 de Noviembre — Chofer&lt;/title&gt;
+&lt;style&gt;
+:root{--rojo:#b3261e;--amar:#f2b705;--verde:#1f7a3a;--azul:#1d4e89;--fondo:#f6f1e7;--card:#fff;--txt:#2a2420;--gris:#7a6f66}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;background:var(--fondo);color:var(--txt);padding-bottom:90px}
+.aguayo{height:10px;background:repeating-linear-gradient(90deg,var(--rojo) 0 14px,var(--amar) 14px 28px,var(--verde) 28px 42px,var(--azul) 42px 56px,#e86a1a 56px 70px)}
+header{background:var(--txt);color:#fff;padding:14px 16px;display:flex;gap:12px;align-items:center}
+.movil{background:var(--amar);color:var(--txt);font-weight:900;font-size:26px;border-radius:12px;padding:6px 12px}
+header small{color:#d8cfc4}
+main{padding:12px;max-width:560px;margin:auto}
+.card{background:var(--card);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 1px 4px #0002}
+h2{font-size:16px;margin:0 0 10px}
+.big{font-size:40px;font-weight:900}
+.btn{border:0;border-radius:10px;padding:12px 14px;font-weight:700;font-size:15px;cursor:pointer}
+.ok{background:var(--verde);color:#fff}.no{background:#ddd}.az{background:var(--azul);color:#fff}.am{background:var(--amar)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.lista div{display:flex;justify-content:space-between;padding:8px;border-bottom:1px solid #eee}
+.yo{background:#fff6d6;font-weight:700}
+.tag{font-size:12px;padding:2px 8px;border-radius:20px;background:#eee}
+.alerta{border:3px solid var(--rojo);animation:p 1s infinite}
+@keyframes p{50%{border-color:var(--amar)}}
+.emerg{position:fixed;bottom:14px;right:14px;background:var(--rojo);color:#fff;border:0;border-radius:50%;width:70px;height:70px;font-weight:900;font-size:13px;box-shadow:0 3px 10px #0005}
+.hint{color:var(--gris);font-size:13px}
+.notif div{font-size:13px;padding:6px 0;border-bottom:1px dashed #ddd}
+.demo{background:#efe7d8;border:1px dashed var(--gris)}
+&lt;/style&gt;&lt;/head&gt;&lt;body&gt;
+&lt;div class=&quot;aguayo&quot;&gt;&lt;/div&gt;
+&lt;header&gt;&lt;div class=&quot;movil&quot;&gt;12&lt;/div&gt;&lt;div&gt;&lt;b&gt;Fermín Choque&lt;/b&gt;&lt;br&gt;&lt;small&gt;Toyota Hiace · 10 asientos · ★ 4,7&lt;/small&gt;&lt;/div&gt;&lt;/header&gt;
+&lt;main&gt;
+&lt;div id=&quot;aviso&quot;&gt;&lt;/div&gt;
+&lt;div class=&quot;card&quot;&gt;&lt;h2&gt;Mi turno — Terminal Torotoro&lt;/h2&gt;&lt;div class=&quot;big&quot; id=&quot;pos&quot;&gt;&lt;/div&gt;&lt;div class=&quot;hint&quot; id=&quot;posTxt&quot;&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&quot;card&quot;&gt;&lt;h2&gt;Salidas de madrugada (provisional)&lt;/h2&gt;&lt;div id=&quot;madru&quot;&gt;&lt;/div&gt;&lt;p class=&quot;hint&quot;&gt;Se conoce cuando sale el penúltimo. Si alguien toma un contrato, todos se recorren y la app avisa.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&quot;card&quot;&gt;&lt;h2&gt;Lista de turnos&lt;/h2&gt;&lt;div class=&quot;lista&quot; id=&quot;lista&quot;&gt;&lt;/div&gt;
+&lt;div class=&quot;row&quot; style=&quot;margin-top:10px&quot;&gt;&lt;button class=&quot;btn am&quot; id=&quot;btnContrato&quot; onclick=&quot;contrato(MI)&quot;&gt;Tengo contrato privado&lt;/button&gt;&lt;/div&gt;
+&lt;div class=&quot;row&quot; style=&quot;margin-top:8px&quot;&gt;&lt;button class=&quot;btn no&quot; id=&quot;btnFinal&quot; onclick=&quot;alFinal()&quot;&gt;No voy ahora → pasar al final&lt;/button&gt;&lt;button class=&quot;btn no&quot; id=&quot;btnDejar&quot; onclick=&quot;dejarLista()&quot;&gt;No salgo hoy → dejar la lista&lt;/button&gt;&lt;/div&gt;&lt;p class=&quot;hint&quot;&gt;Si avisas con tiempo, no es falta. Si ya te toca (2.º, 3.º o carril), cuenta como falta, salvo emergencia justificada.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&quot;card&quot;&gt;&lt;h2&gt;Mis pasajeros&lt;/h2&gt;&lt;div id=&quot;pas&quot;&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&quot;card&quot;&gt;&lt;h2&gt;Encomiendas&lt;/h2&gt;&lt;div id=&quot;enc&quot;&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&quot;card&quot;&gt;&lt;h2&gt;Mi cuenta con el sindicato&lt;/h2&gt;&lt;div class=&quot;big&quot; id=&quot;cta&quot; style=&quot;color:#c62828&quot;&gt;Debes 55 Bs&lt;/div&gt;&lt;div class=&quot;hint&quot;&gt;&lt;span id=&quot;ctaDet&quot;&gt;1 salida sin pagar (25 Bs) · cuota de noviembre (30 Bs)&lt;/span&gt;&lt;br&gt;⚠️ Con 3 salidas sin pagar no podrás anotarte en la fila.&lt;br&gt;Paga al cajero en efectivo o por QR; cuando él lo aprueba, aquí se pone al día.&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&quot;card&quot;&gt;&lt;h2&gt;Avisos&lt;/h2&gt;&lt;div class=&quot;notif&quot; id=&quot;notif&quot;&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&quot;card demo&quot;&gt;&lt;h2&gt;Botones de demostración&lt;/h2&gt;&lt;div class=&quot;row&quot;&gt;
+&lt;button class=&quot;btn no&quot; onclick=&quot;salir()&quot;&gt;Sale el 1.º de la lista&lt;/button&gt;
+&lt;button class=&quot;btn no&quot; onclick=&quot;contrato(lista[1])&quot;&gt;Otro chofer toma contrato&lt;/button&gt;
+&lt;button class=&quot;btn no&quot; onclick=&quot;cerca()&quot;&gt;Simular acercarse a parada&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;/main&gt;
+&lt;button class=&quot;emerg&quot; onclick=&quot;emergencia()&quot;&gt;SOS&lt;/button&gt;
+&lt;script&gt;
+const MI=&#x27;Móvil 12&#x27;;
+let lista=[&#x27;Móvil 7&#x27;,&#x27;Móvil 3&#x27;,&#x27;Móvil 21&#x27;,&#x27;Móvil 12&#x27;,&#x27;Móvil 9&#x27;,&#x27;Móvil 15&#x27;,&#x27;Móvil 4&#x27;,&#x27;Móvil 18&#x27;];
+let pendiente=null,timer=null,seg=0;
+const PASAJE=45,TAR={Liviano:0,Mediano:10,Pesado:20};
+const pasajeros=[{a:1,n:&#x27;Rosa Mamani&#x27;,eq:&#x27;Liviano&#x27;,r:&#x27;Oficina&#x27;,st:&#x27;apartado&#x27;,sube:&#x27;Torotoro&#x27;,baja:&#x27;Cliza&#x27;},{a:2,n:&#x27;Juan Mamani&#x27;,eq:&#x27;Pesado&#x27;,r:&#x27;Río Caine&#x27;,st:&#x27;apartado&#x27;,sube:&#x27;Río Caine&#x27;,baja:&#x27;Cochabamba&#x27;},{a:5,n:&#x27;Claire Dubois&#x27;,eq:&#x27;Liviano&#x27;,r:&#x27;Casa&#x27;,st:&#x27;apartado&#x27;,sube:&#x27;Torotoro&#x27;,baja:&#x27;Cochabamba&#x27;,lat:-18.1335,lng:-65.7628}];
+let enc=[{p:&#x27;Rancho Pampa&#x27;,t:&#x27;Pollos (2 cajas)&#x27;,env:&#x27;Luis Arce Q. · 7xxxxxxx&#x27;,rec:&#x27;Doña Elena · 6xxxxxxx&#x27;,recibida:true,ok:false,plz:4,quedan:80,val:300,pin:&#x27;4821&#x27;},{p:&#x27;Anzaldo&#x27;,t:&#x27;Ropa / zapatos · Frágil&#x27;,env:&#x27;Comercial Vargas&#x27;,rec:&#x27;Pedro Rocha · 7xxxxxxx&#x27;,recibida:false,ok:false,plz:24,quedan:1380,val:250,pin:&#x27;1907&#x27;},{p:&#x27;Torotoro (terminal)&#x27;,t:&#x27;Sobre / documento&#x27;,env:&#x27;Notaría Cbba&#x27;,rec:&#x27;Sra. Ríos · 7xxxxxxx&#x27;,recibida:true,ok:false,plz:72,quedan:4000,val:50,pin:&#x27;3355&#x27;}];
+let notifs=[&#x27;Te anotaste a la lista con QR + huella.&#x27;];
+function nota(t){notifs.unshift(new Date().toLocaleTimeString(&#x27;es-BO&#x27;,{hour:&#x27;2-digit&#x27;,minute:&#x27;2-digit&#x27;})+&#x27; — &#x27;+t);}
+window.t21Sync=function(){if(!window.T21)return;let ch=false;
+ {const c=T21.get(&#x27;ctas&#x27;,{})[12]||{extra:0};const pag=c.ok12;const s=(pag?0:1)+(c.extra||0);const tot=s*25+(pag?0:30);const e=document.getElementById(&#x27;cta&#x27;);
+  if(e){e.textContent=tot?&#x27;Debes &#x27;+tot+&#x27; Bs&#x27;:&#x27;✅ Estás al día&#x27;;e.style.color=tot?&#x27;#c62828&#x27;:&#x27;#2e7d32&#x27;;document.getElementById(&#x27;ctaDet&#x27;).textContent=tot?(s+&#x27; salida(s) sin pagar (&#x27;+s*25+&#x27; Bs)&#x27;+(pag?&#x27;&#x27;:&#x27; · cuota de noviembre (30 Bs)&#x27;)):&#x27;El cajero aprobó tu pago.&#x27;;
+  if(s&gt;=3&amp;&amp;!window._bq){window._bq=1;nota(&#x27;⛔ Tienes 3 salidas sin pagar: no puedes anotarte en la fila hasta pagar.&#x27;)}}}
+ T21.get(&#x27;pas12&#x27;,[]).slice().reverse().forEach(p=&gt;{if(!pasajeros.some(x=&gt;x.app&amp;&amp;x.a==p.a&amp;&amp;x.n==p.n)){pasajeros.push(p);nota(&#x27;📲 Nueva reserva por la app: &#x27;+p.n+&#x27;, asiento &#x27;+p.a);ch=true}});
+ T21.get(&#x27;encs&#x27;,[]).slice().reverse().forEach(e=&gt;{if(!enc.some(x=&gt;x.cod==e.cod)){enc.push(e);nota(&#x27;📦 Nueva encomienda registrada por la app (&#x27;+e.cod+&#x27;) para &#x27;+e.p);ch=true}});
+ if(ch)render()};
+window.addEventListener(&#x27;storage&#x27;,()=&gt;window.t21Sync());setTimeout(()=&gt;window.t21Sync(),300);
+function render(){
+ const i=lista.indexOf(MI);
+ document.getElementById(&#x27;pos&#x27;).textContent=i&lt;0?&#x27;—&#x27;:(i+1)+&#x27;.º&#x27;;
+ document.getElementById(&#x27;posTxt&#x27;).textContent=window.pausa&amp;&amp;i&gt;=0?&#x27;⏸ En pausa por falla mecánica: conservas tu lugar hasta 24 horas (la lista sigue corriendo; si no se arregla, pasas al final).&#x27;:i&lt;0?&#x27;Fuera de la lista (contrato). Al volver te anotas de nuevo.&#x27;:i==0?&#x27;¡Estás en el carril! Llenando pasajeros.&#x27;:&#x27;Faltan &#x27;+i+&#x27; móvil(es) antes que tú.&#x27;;
+ document.getElementById(&#x27;lista&#x27;).innerHTML=lista.map((m,k)=&gt;`&lt;div class=&quot;${m==MI?&#x27;yo&#x27;:&#x27;&#x27;}&quot;&gt;&lt;span&gt;${k+1}. ${m}&lt;/span&gt;&lt;span class=&quot;tag&quot;&gt;${k==0?&#x27;En carril&#x27;:k&lt;3?&#x27;Avisado&#x27;:&#x27;En espera&#x27;}&lt;/span&gt;&lt;/div&gt;`).join(&#x27;&#x27;);
+ const h=[&#x27;3:00&#x27;,&#x27;4:00&#x27;,&#x27;6:00&#x27;],ult=lista.length;
+ document.getElementById(&#x27;madru&#x27;).innerHTML=h.map((x,k)=&gt;{const m=lista[ult-3+k];return `&lt;div class=&quot;lista&quot;&gt;&lt;div class=&quot;${m==MI?&#x27;yo&#x27;:&#x27;&#x27;}&quot;&gt;&lt;span&gt;${x}&lt;/span&gt;&lt;span&gt;${m||&#x27;Por asignar&#x27;}&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;`}).join(&#x27;&#x27;);
+ document.getElementById(&#x27;pas&#x27;).innerHTML=&#x27;&lt;p class=&quot;hint&quot;&gt;🟧 Apartado = reservó pero aún no subió. Márcalo cuando suba.&lt;/p&gt;&#x27;+pasajeros.map((p,k)=&gt;{
+  const col=p.st===&#x27;subio&#x27;?&#x27;#cfe9d6&#x27;:p.st===&#x27;nollego&#x27;?&#x27;#f3d0cd&#x27;:p.st===&#x27;yendo&#x27;?&#x27;#dbe7f5&#x27;:&#x27;#fde2c4&#x27;;
+  const txt=p.st===&#x27;subio&#x27;?&#x27;Subió ✓&#x27;:p.st===&#x27;nollego&#x27;?&#x27;No llegó · asiento liberado&#x27;:p.st===&#x27;yendo&#x27;?&#x27;Yendo a recoger&#x27;:&#x27;Apartado&#x27;;
+  let b=&#x27;&#x27;;
+  if(p.st===&#x27;apartado&#x27;&amp;&amp;p.r===&#x27;Casa&#x27;)b=`&lt;button class=&quot;btn az&quot; onclick=&quot;pasa(${k},&#x27;yendo&#x27;)&quot;&gt;🚐 Voy a recogerte · ver ubicación&lt;/button&gt;`;
+  if(p.st===&#x27;apartado&#x27;||p.st===&#x27;yendo&#x27;)b+=` &lt;button class=&quot;btn ok&quot; onclick=&quot;pasa(${k},&#x27;subio&#x27;)&quot;&gt;Subió&lt;/button&gt; &lt;button class=&quot;btn no&quot; onclick=&quot;pasa(${k},&#x27;nollego&#x27;)&quot;&gt;${p.r===&#x27;Casa&#x27;?&#x27;No estaba&#x27;:&#x27;No llegó&#x27;}&lt;/button&gt;`;
+  if(p.st!==&#x27;apartado&#x27;)b+=` &lt;button class=&quot;btn no&quot; onclick=&quot;corregir(${k})&quot;&gt;↩ Corregir&lt;/button&gt;`;
+  return `&lt;div class=&quot;lista&quot;&gt;&lt;div style=&quot;display:block&quot;&gt;&lt;b&gt;Asiento ${p.a} · ${esc(p.n)}&lt;/b&gt; &lt;span class=&quot;tag&quot; style=&quot;background:${col}&quot;&gt;${txt}&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;hint&quot;&gt;${p.sube?`🧭 Sube en &lt;b&gt;${p.sube}&lt;/b&gt; → baja en &lt;b&gt;${p.baja}&lt;/b&gt;&lt;br&gt;`:&#x27;&#x27;}&lt;b style=&quot;color:#1f7a3a&quot;&gt;Cobrar: ${(p.sube===&#x27;Río Caine&#x27;?40:PASAJE)+(TAR[p.eq]||0)} Bs&lt;/b&gt; (pasaje ${p.sube===&#x27;Río Caine&#x27;?40:PASAJE}${TAR[p.eq]?&#x27; + equipaje &#x27;+TAR[p.eq]:&#x27;&#x27;}) · Equipaje: ${p.eq} · Recojo: ${p.r===&#x27;Casa&#x27;?&#x27;en su casa&#x27;:p.r===&#x27;Río Caine&#x27;?&#x27;en el camino, Río Caine&#x27;:p.r}&lt;/span&gt;&lt;div class=&quot;row&quot; style=&quot;margin-top:6px&quot;&gt;${b}&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;`}).join(&#x27;&#x27;)+&#x27;&lt;div class=&quot;row&quot; style=&quot;margin-top:8px&quot;&gt;&lt;button class=&quot;btn no&quot; onclick=&quot;sinReserva()&quot;&gt;+ Anotar pasajero sin reserva&lt;/button&gt;&lt;button class=&quot;btn am&quot; onclick=&quot;extra()&quot;&gt;+ Asiento extra (excepcional)&lt;/button&gt;&lt;/div&gt;&lt;p class=&quot;hint&quot;&gt;Máximo 14 pasajeros. El asiento extra no se reserva por la app: solo tú lo habilitas y queda registrado para el sindicato.&lt;/p&gt;&#x27;;
+ document.getElementById(&#x27;enc&#x27;).innerHTML=enc.map((e,k)=&gt;{const plz=e.plz==4?&#x27;🔴 ⚡ ENTREGA RÁPIDA&#x27;:e.plz==24?&#x27;🟡 Normal&#x27;:&#x27;🟢 Aguanta&#x27;;const q=e.quedan&lt;=0?&#x27;&lt;b style=&quot;color:#c62828&quot;&gt;⏰ PLAZO VENCIDO&lt;/b&gt;&#x27;:&#x27;quedan &#x27;+(e.quedan&gt;=60?Math.floor(e.quedan/60)+&#x27; h &#x27;:&#x27;&#x27;)+(e.quedan%60)+&#x27; min&#x27;;
+ let acc=&#x27;&#x27;;
+ if(!e.recibida)acc=`&lt;button class=&quot;btn az&quot; onclick=&quot;recibir(${k})&quot;&gt;📷 Recibí y saqué foto&lt;/button&gt;`;
+ else if(e.ok)acc=`&lt;span class=&quot;tag&quot; style=&quot;background:#cfe9d6&quot;&gt;Entregado ✓ con código&lt;/span&gt; &lt;button class=&quot;btn no&quot; onclick=&quot;enc[${k}].ok=false;nota(&#x27;Corregido: encomienda de &#x27;+enc[${k}].p+&#x27; vuelve a pendiente.&#x27;);render()&quot;&gt;↩ Corregir&lt;/button&gt;`;
+ else if(e.inc)acc=`&lt;span class=&quot;tag&quot; style=&quot;background:#f8d7d4&quot;&gt;⚠️ ${e.inc}&lt;/span&gt;`;
+ else acc=`&lt;div class=&quot;row&quot;&gt;&lt;input id=&quot;pin${k}&quot; inputmode=&quot;numeric&quot; maxlength=&quot;4&quot; placeholder=&quot;Código de quien recoge&quot; style=&quot;width:170px;padding:8px&quot;&gt;&lt;button class=&quot;btn ok&quot; onclick=&quot;entregar(${k})&quot;&gt;Entregué&lt;/button&gt;&lt;/div&gt;
+ &lt;div class=&quot;row&quot; style=&quot;margin-top:6px&quot;&gt;&lt;select id=&quot;mot${k}&quot; style=&quot;padding:8px;max-width:100%&quot;&gt;&lt;option&gt;No encontré a quien recoge → lo dejo en la oficina&lt;/option&gt;&lt;option&gt;Accidente o problema en el camino&lt;/option&gt;&lt;option&gt;Se dañó en el viaje&lt;/option&gt;&lt;option&gt;Se perdió&lt;/option&gt;&lt;/select&gt;&lt;button class=&quot;btn no&quot; onclick=&quot;noEntregue(${k})&quot;&gt;No pude entregar&lt;/button&gt;&lt;/div&gt;
+ &lt;p class=&quot;hint&quot;&gt;Demo: el código es ${e.pin}. &lt;button class=&quot;btn no&quot; onclick=&quot;enc[${k}].quedan=0;nota(&#x27;⏰ Plazo vencido: encomienda para &#x27;+enc[${k}].p+&#x27;. Se avisó a quien envía, a quien recibe y a la directiva.&#x27;);render()&quot;&gt;Demo: pasar el plazo&lt;/button&gt;&lt;/p&gt;`;
+ return `&lt;div class=&quot;lista&quot; style=&quot;${e.plz==4&amp;&amp;!e.ok?&#x27;border-left:5px solid #c62828;padding-left:8px&#x27;:&#x27;&#x27;}&quot;&gt;&lt;div style=&quot;display:block;width:100%&quot;&gt;&lt;b&gt;${e.p}&lt;/b&gt; &lt;span class=&quot;tag&quot;&gt;${e.t}&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;hint&quot;&gt;${plz} · ${e.ok?&#x27;&#x27;:q}${e.val&gt;500?&#x27; · 🔒 Sellado (entrega con foto y código)&#x27;:&#x27;&#x27;}&lt;br&gt;Envía: ${e.env}&lt;br&gt;Recoge: ${e.rec}&lt;/span&gt;&lt;br&gt;${acc}&lt;/div&gt;&lt;/div&gt;`}).join(&#x27;&#x27;);
+ const enL=lista.includes(MI);document.getElementById(&#x27;btnFinal&#x27;).style.display=enL?&#x27;&#x27;:&#x27;none&#x27;;const bd=document.getElementById(&#x27;btnDejar&#x27;);bd.textContent=enL?&#x27;No salgo hoy → dejar la lista&#x27;:&#x27;Anotarme de nuevo (demo QR)&#x27;;bd.onclick=enL?dejarLista:volverLista;
+ const bc=document.getElementById(&#x27;btnContrato&#x27;);bc.disabled=(i==0);bc.style.opacity=i==0?.4:1;bc.textContent=i==0?&#x27;Contrato no disponible (estás en el carril)&#x27;:&#x27;Tengo contrato privado&#x27;;
+ document.getElementById(&#x27;notif&#x27;).innerHTML=notifs.map(n=&gt;`&lt;div&gt;${n}&lt;/div&gt;`).join(&#x27;&#x27;);
+ const av=document.getElementById(&#x27;aviso&#x27;);
+ if(pendiente){av.innerHTML=`&lt;div class=&quot;card alerta&quot;&gt;&lt;h2&gt;¡Te toca pronto!&lt;/h2&gt;&lt;p&gt;${pendiente}&lt;/p&gt;&lt;div class=&quot;big&quot;&gt;${Math.floor(seg/60)}:${String(seg%60).padStart(2,&#x27;0&#x27;)}&lt;/div&gt;&lt;p class=&quot;hint&quot;&gt;Confirma antes de que termine el tiempo o pasas al siguiente.&lt;/p&gt;&lt;div class=&quot;row&quot;&gt;&lt;button class=&quot;btn ok&quot; onclick=&quot;confirmar()&quot;&gt;Confirmo, voy&lt;/button&gt;&lt;button class=&quot;btn no&quot; onclick=&quot;alFinal()&quot;&gt;No voy → al final&lt;/button&gt;&lt;button class=&quot;btn no&quot; onclick=&quot;dejarLista()&quot;&gt;No salgo hoy&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;`}else av.innerHTML=&#x27;&#x27;;
+}
+function revisarAviso(){const i=lista.indexOf(MI);if((i==1||i==2)&amp;&amp;!pendiente&amp;&amp;!window.confirmado){pendiente=&#x27;Eres el &#x27;+(i+1)+&#x27;.º de la lista. Acércate a la terminal.&#x27;;seg=600;clearInterval(timer);timer=setInterval(()=&gt;{seg--;if(seg&lt;=0){rechazar(&#x27;Se acabó el tiempo&#x27;)}render()},1000);nota(&#x27;Aviso de turno recibido.&#x27;);}}
+function confirmar(){clearInterval(timer);pendiente=null;window.confirmado=true;nota(&#x27;Confirmaste tu turno.&#x27;);render()}
+function rechazar(m){clearInterval(timer);pendiente=null;const i=lista.indexOf(MI);if(i&gt;=0){lista.splice(i,1);lista.push(MI)}nota((m||&#x27;No confirmaste&#x27;)+&#x27;: pasaste al final; el siguiente sube. ⚠️ Queda anotado para la directiva.&#x27;);render()}
+function tarde(){const i=lista.indexOf(MI);return i&gt;=0&amp;&amp;i&lt;=2}
+function retiro(tipo){clearInterval(timer);pendiente=null;if(tarde()){window._tipo=tipo;document.getElementById(&#x27;aviso&#x27;).innerHTML=`&lt;div class=&quot;card alerta&quot;&gt;&lt;h2&gt;Ya te toca (vas ${lista.indexOf(MI)+1}.º)&lt;/h2&gt;&lt;p&gt;Retirarte ahora perjudica a los pasajeros y a los demás choferes.&lt;/p&gt;
+&lt;select id=&quot;motR&quot; style=&quot;width:100%;padding:10px&quot; onchange=&quot;document.getElementById(&#x27;fotoF&#x27;).style.display=this.value.startsWith(&#x27;Falla&#x27;)?&#x27;block&#x27;:&#x27;none&#x27;&quot;&gt;&lt;option value=&quot;&quot;&gt;Solo no quiero / no puedo salir (cuenta como falta)&lt;/option&gt;&lt;option&gt;Fallecimiento de un familiar&lt;/option&gt;&lt;option&gt;Accidente o familiar grave&lt;/option&gt;&lt;option&gt;Problema de salud&lt;/option&gt;&lt;option&gt;Falla mecánica del móvil (pausa con foto)&lt;/option&gt;&lt;option&gt;No tengo combustible (cuenta como falta)&lt;/option&gt;&lt;option&gt;Otra emergencia grave&lt;/option&gt;&lt;/select&gt;
+&lt;div id=&quot;fotoF&quot; style=&quot;display:none;margin:8px 0&quot;&gt;&lt;button class=&quot;btn az&quot; onclick=&quot;window._foto=new Date().toLocaleTimeString(&#x27;es-BO&#x27;,{hour:&#x27;2-digit&#x27;,minute:&#x27;2-digit&#x27;});this.textContent=&#x27;📷 Foto tomada ✓ (placa visible · &#x27;+window._foto+&#x27; · ubicación guardada)&#x27;&quot;&gt;📷 Tomar foto del móvil (con la placa visible)&lt;/button&gt;&lt;p class=&quot;hint&quot;&gt;Solo con la cámara de la app, no desde la galería. Conservas tu lugar en pausa hasta 24 horas (la lista sigue corriendo; si no se arregla, pasas al final). Máximo 2 fallas justificadas al mes (llevas ${window.fallas||0}).&lt;/p&gt;&lt;/div&gt;
+&lt;p class=&quot;hint&quot;&gt;Si es una emergencia, no cuenta como falta: el secretario de transporte la revisa y la justifica.&lt;/p&gt;&lt;div class=&quot;row&quot;&gt;&lt;button class=&quot;btn rj&quot; onclick=&quot;hacerRetiro()&quot;&gt;Confirmar retiro&lt;/button&gt;&lt;button class=&quot;btn no&quot; onclick=&quot;render()&quot;&gt;Mejor no, sigo en mi turno&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;`;return}
+window._tipo=tipo;hacerRetiro(true)}
+function hacerRetiro(temprano){let m=temprano?&#x27;&#x27;:document.getElementById(&#x27;motR&#x27;).value;if(m.startsWith(&#x27;No tengo combustible&#x27;))m=&#x27;&#x27;;
+if(m.startsWith(&#x27;Falla&#x27;)){if(!window._foto){alert(&#x27;Para falla mecánica tienes que tomar la foto del móvil con la placa visible.&#x27;);return}window.fallas=(window.fallas||0)+1;const f=window._foto;window._foto=null;
+ if(window.fallas&gt;2){window.faltas=(window.faltas||0)+1;nota(&#x27;⚠️ Falla mecánica n.º &#x27;+window.fallas+&#x27; este mes: pasa el límite de 2, cuenta como FALTA.&#x27;)}
+ else{window.pausa=true;nota(&#x27;⏸ En pausa por falla mecánica (foto &#x27;+f+&#x27;, placa y ubicación guardadas). Conservas tu lugar hasta 24 horas (la lista sigue corriendo; si no se arregla, pasas al final); los de atrás salen antes que tú. Falla &#x27;+window.fallas+&#x27; de 2 este mes. La directiva lo ve.&#x27;)}
+ nota(&#x27;🔔 Se avisó al 4.º de la lista como reserva.&#x27;);render();return}
+const i=lista.indexOf(MI);if(i&lt;0)return;lista.splice(i,1);if(window._tipo==&#x27;final&#x27;)lista.push(MI);window.confirmado=false;
+const que=window._tipo==&#x27;final&#x27;?&#x27;Pasaste al final&#x27;:&#x27;Dejaste la lista por hoy&#x27;;
+if(temprano)nota(que+&#x27; con tiempo: sin falta. Los demás suben un puesto y se les avisa.&#x27;);
+else if(m)nota(&#x27;🚨 &#x27;+que+&#x27; por emergencia: &#x27;+m+&#x27;. Enviado al secretario de transporte para justificar (sin falta si la aprueba). Se avisó al reemplazo.&#x27;);
+else{window.faltas=(window.faltas||0)+1;nota(&#x27;⚠️ &#x27;+que+&#x27; a último momento: FALTA &#x27;+window.faltas+&#x27; de 3 este mes. Con 3 faltas se suspende un día. Se avisó al reemplazo.&#x27;)}
+nota(&#x27;🔔 Se avisó al 4.º de la lista como reserva.&#x27;);render()}
+function finPausa(){window.pausa=false;nota(&#x27;Móvil arreglado: sales de la pausa y vuelves a tu turno.&#x27;);render()}
+function alFinal(){retiro(&#x27;final&#x27;)}
+function dejarLista(){retiro(&#x27;dejar&#x27;)}
+function volverLista(){if(lista.includes(MI))return;lista.push(MI);nota(&#x27;Te anotaste de nuevo con QR + huella: entras al final de la lista.&#x27;);render()}
+function salir(){const m=lista.shift();if(m==MI){nota(&#x27;Saliste. Al llegar a Cochabamba te anotas al final.&#x27;);window.confirmado=false}else nota(m+&#x27; salió. Todos suben un puesto.&#x27;);lista.push(m);revisarAviso();render()}
+function contrato(m){if(!m)return;const i=lista.indexOf(m);if(i&lt;=0)return;if(!confirm(m+&#x27; marca contrato privado. ¿Confirmar?&#x27;))return;lista.splice(i,1);nota(m+&#x27; tomó contrato: sale de la lista, los de atrás suben un puesto. Sindicato y clientes reservados avisados.&#x27;);revisarAviso();render()}
+function recibir(k){enc[k].recibida=true;nota(&#x27;Encomienda para &#x27;+enc[k].p+&#x27; recibida con foto. Avisamos al que recoge.&#x27;);render()}
+function esc(t){return String(t).replace(/[&amp;&lt;&gt;&quot;&#x27;]/g,c=&gt;({&#x27;&amp;&#x27;:&#x27;&amp;amp;&#x27;,&#x27;&lt;&#x27;:&#x27;&amp;lt;&#x27;,&#x27;&gt;&#x27;:&#x27;&amp;gt;&#x27;,&#x27;&quot;&#x27;:&#x27;&amp;quot;&#x27;,&quot;&#x27;&quot;:&#x27;&amp;#39;&#x27;}[c]))}
+function corregir(k){const p=pasajeros[k];if(!confirm(&#x27;¿Volver a &#x27;+p.n+&#x27; a &quot;Apartado&quot;?&#x27;))return;
+ if(p.st===&#x27;nollego&#x27;)nota(&#x27;Corregido: se quitó la falta a &#x27;+p.n+&#x27;.&#x27;);
+ p.st=&#x27;apartado&#x27;;nota(&#x27;Corregido: &#x27;+p.n+&#x27; vuelve a Apartado.&#x27;);render()}
+function pasa(k,st){const p=pasajeros[k];p.st=st;
+ if(st===&#x27;yendo&#x27;&amp;&amp;p.lat)window.open(&#x27;https://www.google.com/maps/dir/?api=1&amp;destination=&#x27;+p.lat+&#x27;,&#x27;+p.lng,&#x27;_blank&#x27;);
+ if(st===&#x27;yendo&#x27;)nota(&#x27;Avisamos a &#x27;+p.n+&#x27;: &quot;Tu móvil va a recogerte&quot;.&#x27;);
+ if(st===&#x27;subio&#x27;)nota(p.n+&#x27; subió. Asiento &#x27;+p.a+&#x27; ocupado.&#x27;);
+ if(st===&#x27;nollego&#x27;)nota(p.n+&#x27; no llegó. Asiento &#x27;+p.a+&#x27; liberado y falta anotada al cliente.&#x27;);
+ render()}
+function entregar(k){const v=(document.getElementById(&#x27;pin&#x27;+k)||{}).value;if(v!==enc[k].pin){alert(&#x27;Código incorrecto. Pídele a quien recoge el código que le llegó por SMS.&#x27;);return}enc[k].ok=true;nota(&#x27;Encomienda entregada en &#x27;+enc[k].p+&#x27; con código y foto.&#x27;);render()}
+function noEntregue(k){const m=document.getElementById(&#x27;mot&#x27;+k).value;const e=enc[k];e.inc=m.startsWith(&#x27;No encontré&#x27;)?&#x27;En la oficina, esperando a quien recoge&#x27;:m;nota(&#x27;No entregada (&#x27;+e.p+&#x27;): &#x27;+m+&#x27;. Se avisó a quien envía y a quien recibe&#x27;+(m.startsWith(&#x27;No encontré&#x27;)?&#x27;.&#x27;:&#x27;; reclamo al secretario de justicia.&#x27;));render()}
+function cerca(){const e=enc.find(x=&gt;x.recibida&amp;&amp;!x.ok);if(!e){alert(&#x27;No hay encomiendas pendientes&#x27;);return}alert(&#x27;🔔 Te acercas a &#x27;+e.p+&#x27;: tienes una encomienda para &#x27;+e.rec);nota(&#x27;Recordatorio: encomienda para &#x27;+e.p)}
+function extra(){if(pasajeros.some(p=&gt;p.a===&#x27;Extra&#x27;&amp;&amp;p.st!==&#x27;nollego&#x27;)){alert(&#x27;Ya hay un asiento extra en este viaje.&#x27;);return}
+ const n=prompt(&#x27;Nombre del pasajero en el asiento extra&#x27;);if(!n)return;const m=prompt(&#x27;Motivo (ej.: niño con su mamá)&#x27;);if(!m)return;
+ pasajeros.push({a:&#x27;Extra&#x27;,n:n+&#x27; — &#x27;+m,eq:&#x27;Liviano&#x27;,r:&#x27;Terminal&#x27;,st:&#x27;subio&#x27;});nota(&#x27;⚠ Asiento extra: &#x27;+n+&#x27; (&#x27;+m+&#x27;). Registrado como excepcional para el sindicato.&#x27;);render()}
+function sinReserva(){const n=prompt(&#x27;Nombre del pasajero&#x27;);if(!n)return;const usados=pasajeros.filter(p=&gt;p.st!==&#x27;nollego&#x27;).map(p=&gt;p.a);let a=1;while(usados.includes(a))a++;if(a&gt;10){alert(&#x27;Lleno&#x27;);return}pasajeros.push({a,n,eq:&#x27;Liviano&#x27;,r:&#x27;Terminal&#x27;,st:&#x27;subio&#x27;});nota(n+&#x27; anotado en asiento &#x27;+a);render()}
+function emergencia(){if(confirm(&#x27;¿Enviar EMERGENCIA con tu ubicación al sindicato y choferes cercanos?&#x27;)){nota(&#x27;🚨 Emergencia enviada con ubicación.&#x27;);alert(&#x27;Emergencia enviada. El sindicato y los choferes cercanos fueron avisados.&#x27;);render()}}
+revisarAviso();render();
+&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;" style="display:none"></iframe>
+<iframe id="f_oficina" srcdoc="&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;es&quot;&gt;&lt;head&gt;&lt;script&gt;
+window.T21={get(k,d){try{return JSON.parse(localStorage.getItem(&#x27;t21_&#x27;+k))??d}catch(e){return d}},
+set(k,v){localStorage.setItem(&#x27;t21_&#x27;+k,JSON.stringify(v));try{parent.postMessage({t21:k},&#x27;*&#x27;)}catch(e){}},
+push(k,v){const a=this.get(k,[]);a.unshift(v);this.set(k,a)}};
+&lt;/script&gt;&lt;meta charset=&quot;UTF-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;
+&lt;title&gt;Transporte 21 de Noviembre — Oficina&lt;/title&gt;
+&lt;style&gt;
+:root{--rojo:#b3261e;--amar:#f2b705;--verde:#1f7a3a;--azul:#1d4e89;--fondo:#f6f1e7;--txt:#2a2420;--gris:#7a6f66}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;background:var(--fondo);color:var(--txt);padding-bottom:30px}
+.aguayo{height:10px;background:repeating-linear-gradient(90deg,var(--rojo) 0 14px,var(--amar) 14px 28px,var(--verde) 28px 42px,var(--azul) 42px 56px,#e86a1a 56px 70px)}
+header{background:var(--txt);color:#fff;padding:12px 16px}header small{color:#d8cfc4}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:10px 12px;background:#fff;border-bottom:1px solid #ddd}
+.tabs button{border:0;border-radius:20px;padding:8px 14px;background:#eee;font-weight:700;white-space:nowrap}
+.tabs button.on{background:var(--txt);color:#fff}
+main{padding:12px;max-width:640px;margin:auto}
+.card{background:#fff;border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 1px 4px #0002}
+h2{font-size:16px;margin:0 0 10px}
+.btn{border:0;border-radius:10px;padding:10px 12px;font-weight:700;cursor:pointer}
+.ok{background:var(--verde);color:#fff}.no{background:#ddd}.az{background:var(--azul);color:#fff}.am{background:var(--amar)}.rj{background:var(--rojo);color:#fff}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.it{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid #eee}
+.tag{font-size:12px;padding:2px 8px;border-radius:20px;background:#eee}
+.hint{color:var(--gris);font-size:13px}
+.big{font-size:44px;font-weight:900}
+.seats{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}.seats i{width:24px;height:24px;border-radius:6px;border:2px solid var(--verde)}
+.seats i.o{background:var(--txt);border-color:var(--txt)}.seats i.x{background:repeating-linear-gradient(45deg,#ccc 0 4px,#fff 4px 8px);border-color:#bbb}
+.alerta{border:3px solid var(--rojo);animation:p 1s infinite}@keyframes p{50%{border-color:var(--amar)}}
+input,select{width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;margin:4px 0 8px;font:inherit}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chips button{border:1px solid #bbb;background:#fff;border-radius:20px;padding:6px 10px}
+.chips button.on{background:var(--txt);color:#fff}
+table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:6px;border-bottom:1px solid #eee;text-align:left}
+.log div{font-size:13px;padding:5px 0;border-bottom:1px dashed #ddd}
+&lt;/style&gt;&lt;/head&gt;&lt;body&gt;
+&lt;div class=&quot;aguayo&quot;&gt;&lt;/div&gt;
+&lt;header&gt;&lt;b&gt;Oficina — Transporte 21 de Noviembre&lt;/b&gt;&lt;div id=&quot;ofi&quot; style=&quot;display:flex;gap:6px;margin-top:8px&quot;&gt;&lt;/div&gt;&lt;small&gt;En la versión real, cada secretaria entra con su usuario y ve su oficina.&lt;/small&gt;&lt;/header&gt;
+&lt;div class=&quot;tabs&quot; id=&quot;tabs&quot;&gt;&lt;/div&gt;
+&lt;main id=&quot;main&quot;&gt;&lt;/main&gt;
+&lt;script&gt;
+const MOV={7:{ch:&#x27;Eusebio Mamani&#x27;,plano:14,grande:false},3:{ch:&#x27;Rubén Arnez&#x27;,plano:14,grande:false},21:{ch:&#x27;Lidia Vargas&#x27;,plano:11,grande:false},12:{ch:&#x27;Fermín Choque&#x27;,plano:10,grande:false},30:{ch:&#x27;Valentín Gutiérrez&#x27;,plano:18,grande:true},9:{ch:&#x27;Hilarión Sejas&#x27;,plano:10,grande:false},15:{ch:&#x27;Marcelino Rocha&#x27;,plano:14,grande:false}};
+MOV[25]={ch:&#x27;Celestino Flores&#x27;,plano:10,grande:false};MOV[11]={ch:&#x27;Severo Camacho&#x27;,plano:14,grande:false};MOV[4]={ch:&#x27;Gregorio Lazo&#x27;,plano:11,grande:false};
+let ofi=&#x27;tor&#x27;;const APORTE=25;let deuda={7:25,9:50},cobradoHoy=0;const OF={tor:&#x27;Torotoro&#x27;,cba:&#x27;Cochabamba&#x27;};
+const FILAS={tor:[30,7,3,21,12,9],cba:[25,11,4]};let fila=FILAS.tor;
+let ocup={30:9,7:3,3:0,21:0,12:0,9:0,25:6,11:2,4:0},hab18={},contratos=[{m:15,dest:&#x27;Contrato a Sucre&#x27;,desde:&#x27;08:40&#x27;,de:&#x27;tor&#x27;}];
+let enc=[],ef={t:new Set()},emerg=null,tab=&#x27;fila&#x27;,log=[&#x27;Sistema iniciado.&#x27;];
+const PAR=[&#x27;Torotoro (terminal)&#x27;,&#x27;Rancho Pampa&#x27;,&#x27;Anzaldo&#x27;,&#x27;Acasio&#x27;,&#x27;Otra parada registrada&#x27;],TIP=[&#x27;Sobre / documento&#x27;,&#x27;Bolsa&#x27;,&#x27;Caja&#x27;,&#x27;Quintal&#x27;,&#x27;Verduras&#x27;,&#x27;Ropa / zapatos&#x27;,&#x27;Celular / electrónico&#x27;,&#x27;Otro&#x27;];
+const CAL=[{m:7,n:22,e:3.9,b:{&#x27;Puntual&#x27;:15,&#x27;Buen trato&#x27;:9},ma:{&#x27;Manejo brusco&#x27;:6,&#x27;Vehículo sucio&#x27;:4}},{m:12,n:31,e:4.7,b:{&#x27;Buen trato&#x27;:25,&#x27;Vehículo limpio&#x27;:20},ma:{&#x27;Paró demasiado&#x27;:2}},{m:21,n:14,e:4.9,b:{&#x27;Cómodo&#x27;:11,&#x27;Manejo seguro&#x27;:10},ma:{}},{m:3,n:40,e:4.1,b:{&#x27;Puntual&#x27;:22},ma:{&#x27;Cobro de más&#x27;:5,&#x27;Mal trato&#x27;:3}}];
+const esc=t=&gt;String(t).replace(/[&amp;&lt;&gt;&quot;&#x27;]/g,c=&gt;({&#x27;&amp;&#x27;:&#x27;&amp;amp;&#x27;,&#x27;&lt;&#x27;:&#x27;&amp;lt;&#x27;,&#x27;&gt;&#x27;:&#x27;&amp;gt;&#x27;,&#x27;&quot;&#x27;:&#x27;&amp;quot;&#x27;,&quot;&#x27;&quot;:&#x27;&amp;#39;&#x27;}[c]));
+const hora=()=&gt;new Date().toLocaleTimeString(&#x27;es-BO&#x27;,{hour:&#x27;2-digit&#x27;,minute:&#x27;2-digit&#x27;});
+const nota=t=&gt;log.unshift(hora()+&#x27; — &#x27;+t);
+const cap=m=&gt;MOV[m].grande&amp;&amp;!hab18[m]?14:MOV[m].plano;
+const TABS=[[&#x27;fila&#x27;,&#x27;Fila y carril&#x27;],[&#x27;enc&#x27;,&#x27;Encomiendas&#x27;],[&#x27;con&#x27;,&#x27;Contratos&#x27;],[&#x27;cal&#x27;,&#x27;Calificaciones&#x27;],[&#x27;log&#x27;,&#x27;Registro&#x27;]];
+window.t21Sync=function(){if(!window.T21)return;Object.keys(ocup).forEach(m=&gt;{const c=t21Cta(m);if(c.pago&amp;&amp;deuda[m]){delete deuda[m];nota(&#x27;✅ El cajero aprobó el pago del móvil &#x27;+m+&#x27;: ya no debe.&#x27;);t21SetCta(m,{pago:false})}});render()};
+window.addEventListener(&#x27;storage&#x27;,()=&gt;window.t21Sync());
+function render(){
+ fila=FILAS[ofi];
+ document.getElementById(&#x27;ofi&#x27;).innerHTML=Object.entries(OF).map(([k,n])=&gt;`&lt;button class=&quot;btn ${k==ofi?&#x27;am&#x27;:&#x27;no&#x27;}&quot; onclick=&quot;ofi=&#x27;${k}&#x27;;render()&quot;&gt;📍 Oficina ${n}&lt;/button&gt;`).join(&#x27;&#x27;);
+ document.getElementById(&#x27;tabs&#x27;).innerHTML=TABS.map(([k,t])=&gt;`&lt;button class=&quot;${k==tab?&#x27;on&#x27;:&#x27;&#x27;}&quot; onclick=&quot;tab=&#x27;${k}&#x27;;render()&quot;&gt;${t}&lt;/button&gt;`).join(&#x27;&#x27;);
+ let h=emerg?`&lt;div class=&quot;card alerta&quot;&gt;&lt;h2&gt;🚨 EMERGENCIA — Móvil ${emerg}&lt;/h2&gt;&lt;p&gt;${esc(MOV[emerg].ch)} pidió ayuda. Ubicación enviada a choferes cercanos.&lt;/p&gt;&lt;div class=&quot;row&quot;&gt;&lt;a class=&quot;btn az&quot; target=&quot;_blank&quot; href=&quot;https://www.google.com/maps?q=-17.95,-65.85&quot;&gt;Ver ubicación&lt;/a&gt;&lt;button class=&quot;btn ok&quot; onclick=&quot;nota(&#x27;Emergencia del móvil ${emerg} atendida.&#x27;);emerg=null;render()&quot;&gt;Atendida&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;`:&#x27;&#x27;;
+ h+=({fila:vFila,enc:vEnc,con:vCon,cal:vCal,log:vLog})[tab]();
+ document.getElementById(&#x27;main&#x27;).innerHTML=h;
+}
+function vFila(){const m=fila[0],c=cap(m),o=Math.min(ocup[m],c);let seats=&#x27;&#x27;;for(let i=1;i&lt;=MOV[m].plano;i++)seats+=`&lt;i class=&quot;${i&lt;=o?&#x27;o&#x27;:i&gt;c?&#x27;x&#x27;:&#x27;&#x27;}&quot;&gt;&lt;/i&gt;`;
+ return `&lt;div class=&quot;card&quot;&gt;&lt;h2&gt;En el carril · hacia ${ofi==&#x27;tor&#x27;?&#x27;Cochabamba&#x27;:&#x27;Torotoro&#x27;}&lt;/h2&gt;&lt;div class=&quot;row&quot; style=&quot;justify-content:space-between&quot;&gt;&lt;div&gt;&lt;div class=&quot;big&quot;&gt;${m}&lt;/div&gt;${esc(MOV[m].ch)}&lt;/div&gt;&lt;div style=&quot;text-align:right&quot;&gt;&lt;b&gt;${o} de ${c}&lt;/b&gt;&lt;br&gt;&lt;span class=&quot;hint&quot;&gt;ocupados&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;
+ &lt;div class=&quot;seats&quot;&gt;${seats}&lt;/div&gt;
+ ${MOV[m].grande?`&lt;p class=&quot;hint&quot;&gt;Auto grande: plano de ${MOV[m].plano}. ${hab18[m]?&#x27;&lt;b&gt;18 habilitados en este viaje.&lt;/b&gt;&#x27;:&#x27;Asientos rayados = fuera de capacidad (máx. 14).&#x27;}&lt;/p&gt;${hab18[m]?&#x27;&#x27;:`&lt;button class=&quot;btn am&quot; onclick=&quot;habilitar(${m})&quot;&gt;Habilitar los ${MOV[m].plano} en este viaje&lt;/button&gt;`}`:&#x27;&#x27;}
+ &lt;div class=&quot;row&quot; style=&quot;margin-top:10px&quot;&gt;&lt;button class=&quot;btn no&quot; onclick=&quot;venta()&quot;&gt;+ Pasajero en ventanilla&lt;/button&gt;&lt;button class=&quot;btn ok&quot; onclick=&quot;despachar()&quot;&gt;Despachar (salió)&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;
+ &lt;div class=&quot;card&quot;&gt;&lt;h2&gt;Fila de turnos · Oficina ${OF[ofi]}&lt;/h2&gt;${fila.map((x,k)=&gt;`&lt;div class=&quot;it&quot;&gt;&lt;span&gt;&lt;b&gt;${k+1}.&lt;/b&gt; Móvil ${x} · ${esc(MOV[x].ch)}&lt;/span&gt;&lt;span class=&quot;row&quot;&gt;${deuda[x]?`&lt;span class=&quot;tag&quot; style=&quot;background:#c62828;color:#fff&quot;&gt;Debe ${deuda[x]} Bs&lt;/span&gt;`:&#x27;&#x27;}&lt;span class=&quot;tag&quot;&gt;${k==0?&#x27;Carril&#x27;:k&lt;3?&#x27;Avisado&#x27;:&#x27;Espera&#x27;}&lt;/span&gt;${k&gt;0?`&lt;button class=&quot;btn no&quot; onclick=&quot;bajar(${k})&quot; title=&quot;Perdió turno&quot;&gt;↓&lt;/button&gt;`:&#x27;&#x27;}&lt;/span&gt;&lt;/div&gt;`).join(&#x27;&#x27;)}
+ &lt;p class=&quot;hint&quot;&gt;↓ = pasar al final (no confirmó). Todo queda en el registro.&lt;/p&gt;
+ &lt;div class=&quot;row&quot;&gt;&lt;button class=&quot;btn no&quot; onclick=&quot;anotar()&quot;&gt;+ Anotar móvil a la fila (sin QR)&lt;/button&gt;&lt;button class=&quot;btn rj&quot; onclick=&quot;emerg=fila[2];nota(&#x27;Demo: alerta de emergencia&#x27;);render()&quot;&gt;Demo: emergencia&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;
+ &lt;div class=&quot;card&quot;&gt;&lt;h2&gt;Aportes por salida&lt;/h2&gt;&lt;p&gt;&lt;b&gt;Cobrado hoy: ${cobradoHoy} Bs&lt;/b&gt;&lt;/p&gt;${Object.keys(deuda).filter(m=&gt;deuda[m]).map(m=&gt;`&lt;div class=&quot;it&quot;&gt;&lt;span&gt;Móvil ${m} · ${esc(MOV[m].ch)} — debe &lt;b&gt;${deuda[m]} Bs&lt;/b&gt;&lt;/span&gt;&lt;button class=&quot;btn ok&quot; onclick=&quot;cobrarDeuda(${m})&quot;&gt;Cobró&lt;/button&gt;&lt;/div&gt;`).join(&#x27;&#x27;)||&#x27;&lt;p class=&quot;hint&quot;&gt;Nadie debe.&lt;/p&gt;&#x27;}&lt;p class=&quot;hint&quot;&gt;Se cobra al despachar. La directiva ve todo esto, no lo puede borrar nadie.&lt;/p&gt;&lt;/div&gt;`;}
+function cobrarDeuda(m){cobradoHoy+=deuda[m];nota(&#x27;Móvil &#x27;+m+&#x27; pagó su deuda de &#x27;+deuda[m]+&#x27; Bs.&#x27;);deuda[m]=0;render()}
+function habilitar(m){if(!confirm(&#x27;¿Habilitar los &#x27;+MOV[m].plano+&#x27; asientos del móvil &#x27;+m+&#x27; solo en este viaje?&#x27;))return;const q=prompt(&#x27;¿Quién autoriza?&#x27;,&#x27;Secretaría&#x27;);if(!q)return;hab18[m]=true;nota(&#x27;Móvil &#x27;+m+&#x27;: &#x27;+MOV[m].plano+&#x27; asientos habilitados por &#x27;+q+&#x27; (solo este viaje).&#x27;);render()}
+function venta(){const m=fila[0];if(ocup[m]&gt;=cap(m)){alert(&#x27;Móvil lleno&#x27;);return}const n=prompt(&#x27;Nombre del pasajero&#x27;);if(!n)return;ocup[m]++;nota(n+&#x27; anotado en ventanilla, móvil &#x27;+m+&#x27;.&#x27;);render()}
+function t21Cta(m){const c=window.T21?T21.get(&#x27;ctas&#x27;,{}):{};return c[m]||{extra:0,pago:false}}
+function t21SetCta(m,v){if(!window.T21)return;const c=T21.get(&#x27;ctas&#x27;,{});c[m]=Object.assign(t21Cta(m),v);T21.set(&#x27;ctas&#x27;,c)}
+function despachar(){const m=fila[0];const pagó=confirm(&#x27;Móvil &#x27;+m+&#x27; sale.\n¿Cobró el aporte de &#x27;+APORTE+&#x27; Bs?\n\nAceptar = cobró · Cancelar = queda como deuda&#x27;);if(pagó){cobradoHoy+=APORTE;if(window.T21)T21.push(&#x27;cobros&#x27;,{m,monto:APORTE});nota(&#x27;Aporte de &#x27;+APORTE+&#x27; Bs cobrado al móvil &#x27;+m+&#x27;.&#x27;)}else{deuda[m]=(deuda[m]||0)+APORTE;t21SetCta(m,{extra:t21Cta(m).extra+1});nota(&#x27;Móvil &#x27;+m+&#x27; salió sin pagar: deuda de &#x27;+APORTE+&#x27; Bs (total &#x27;+deuda[m]+&#x27; Bs).&#x27;)}fila.shift();FILAS[ofi==&#x27;tor&#x27;?&#x27;cba&#x27;:&#x27;tor&#x27;].push(m);if(hab18[m]){delete hab18[m]}nota(&#x27;[&#x27;+OF[ofi]+&#x27;] Móvil &#x27;+m+&#x27; despachado con &#x27;+ocup[m]+&#x27; pasajeros; al llegar entra al final de la fila de &#x27;+(ofi==&#x27;tor&#x27;?&#x27;Cochabamba&#x27;:&#x27;Torotoro&#x27;)+&#x27;. Vuelve a 14 en el próximo viaje.&#x27;);ocup[m]=0;render()}
+function bajar(k){const m=fila.splice(k,1)[0];fila.push(m);nota(&#x27;Móvil &#x27;+m+&#x27; pasó al final de la fila.&#x27;);render()}
+function anotar(){const libres=Object.keys(MOV).map(Number).filter(m=&gt;!FILAS.tor.includes(m)&amp;&amp;!FILAS.cba.includes(m)&amp;&amp;!contratos.some(c=&gt;c.m==m));if(!libres.length){alert(&#x27;Todos los móviles ya están en la fila o en contrato&#x27;);return}const m=Number(prompt(&#x27;Número de móvil (&#x27;+libres.join(&#x27;, &#x27;)+&#x27;)&#x27;));if(!libres.includes(m))return;fila.push(m);ocup[m]=0;nota(&#x27;Móvil &#x27;+m+&#x27; anotado por oficina (manual).&#x27;);render()}
+function vEnc(){return `&lt;div class=&quot;card&quot;&gt;&lt;h2&gt;Recibir encomienda&lt;/h2&gt;&lt;p class=&quot;hint&quot;&gt;Si el cliente ya la registró en la app, busca su código. Si no, llénala aquí.&lt;/p&gt;
+ &lt;div class=&quot;row&quot;&gt;&lt;input id=&quot;cod&quot; placeholder=&quot;Código, ej. E-1234&quot; style=&quot;flex:1&quot;&gt;&lt;button class=&quot;btn no&quot; onclick=&quot;alert(&#x27;En la versión real se cargarían los datos del cliente.&#x27;)&quot;&gt;Buscar&lt;/button&gt;&lt;/div&gt;
+ &lt;b&gt;Tipo&lt;/b&gt;&lt;div class=&quot;chips&quot;&gt;${TIP.map((t,i)=&gt;`&lt;button class=&quot;${ef.t.has(i)?&#x27;on&#x27;:&#x27;&#x27;}&quot; onclick=&quot;ef.t.has(${i})?ef.t.delete(${i}):ef.t.add(${i});render()&quot;&gt;${t}&lt;/button&gt;`).join(&#x27;&#x27;)}&lt;/div&gt;
+ &lt;label&gt;Descripción&lt;input id=&quot;d&quot;&gt;&lt;/label&gt;&lt;label&gt;Parada&lt;select id=&quot;p&quot;&gt;${PAR.map(x=&gt;`&lt;option&gt;${x}&lt;/option&gt;`).join(&#x27;&#x27;)}&lt;/select&gt;&lt;/label&gt;
+ &lt;label&gt;Envía (nombre y celular)&lt;input id=&quot;env&quot;&gt;&lt;/label&gt;&lt;label&gt;Recoge (nombre y celular)&lt;input id=&quot;rec&quot;&gt;&lt;/label&gt;
+ &lt;label&gt;&lt;input type=&quot;checkbox&quot; id=&quot;dec&quot; style=&quot;width:auto&quot;&gt; El cliente declaró que no envía nada prohibido · paquete revisado&lt;/label&gt;
+ &lt;div class=&quot;row&quot;&gt;&lt;button class=&quot;btn az&quot; onclick=&quot;recEnc()&quot;&gt;📷 Foto y recibir&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;
+ &lt;div class=&quot;card&quot;&gt;&lt;h2&gt;Encomiendas de hoy&lt;/h2&gt;${enc.length?enc.map((e,k)=&gt;`&lt;div class=&quot;it&quot;&gt;&lt;span&gt;&lt;b&gt;${e.cod}&lt;/b&gt; · ${esc(e.t)} → ${esc(e.p)}&lt;br&gt;&lt;span class=&quot;hint&quot;&gt;Recoge: ${esc(e.rec)}&lt;/span&gt;&lt;/span&gt;&lt;span&gt;${e.m?`&lt;span class=&quot;tag&quot;&gt;Móvil ${e.m}&lt;/span&gt;`:`&lt;button class=&quot;btn ok&quot; onclick=&quot;enc[${k}].m=fila[0];nota(&#x27;Encomienda &#x27;+enc[${k}].cod+&#x27; asignada al móvil &#x27;+fila[0]);render()&quot;&gt;Al móvil ${fila[0]}&lt;/button&gt;`}&lt;/span&gt;&lt;/div&gt;`).join(&#x27;&#x27;):&#x27;&lt;p class=&quot;hint&quot;&gt;Ninguna todavía.&lt;/p&gt;&#x27;}&lt;/div&gt;`;}
+function recEnc(){const g=id=&gt;document.getElementById(id);if(!ef.t.size||!g(&#x27;env&#x27;).value.trim()||!g(&#x27;rec&#x27;).value.trim()){alert(&#x27;Falta tipo, quién envía o quién recoge&#x27;);return}if(!g(&#x27;dec&#x27;).checked){alert(&#x27;Falta la declaración / revisión&#x27;);return}
+ const e={cod:&#x27;E-&#x27;+(1000+enc.length+1),t:[...ef.t].map(i=&gt;TIP[i]).join(&#x27;, &#x27;),p:g(&#x27;p&#x27;).value,rec:g(&#x27;rec&#x27;).value.trim()};enc.unshift(e);ef={t:new Set()};nota(&#x27;Encomienda &#x27;+e.cod+&#x27; recibida con foto.&#x27;);render()}
+function vCon(){return `&lt;div class=&quot;card&quot;&gt;&lt;h2&gt;Móviles con contrato privado&lt;/h2&gt;${contratos.map((c,k)=&gt;`&lt;div class=&quot;it&quot;&gt;&lt;span&gt;Móvil ${c.m} · ${esc(MOV[c.m].ch)}&lt;br&gt;&lt;span class=&quot;hint&quot;&gt;Salió de ${OF[c.de]} · ${esc(c.dest)} · desde ${c.desde} · capacidad libre (privado)&lt;/span&gt;&lt;/span&gt;&lt;button class=&quot;btn no&quot; onclick=&quot;volver(${k})&quot;&gt;Volvió a ${OF[ofi]} → al final&lt;/button&gt;&lt;/div&gt;`).join(&#x27;&#x27;)||&#x27;&lt;p class=&quot;hint&quot;&gt;Ninguno.&lt;/p&gt;&#x27;}&lt;p class=&quot;hint&quot;&gt;Las dos oficinas ven todos los contratos. Marca &quot;Volvió&quot; la oficina a la que llega el móvil.&lt;/p&gt;&lt;/div&gt;`;}
+function volver(k){const c=contratos.splice(k,1)[0];fila.push(c.m);ocup[c.m]=0;nota(&#x27;Móvil &#x27;+c.m+&#x27; volvió de contrato a &#x27;+OF[ofi]+&#x27;; se anotó al final de esa fila.&#x27;);render()}
+function vCal(){return `&lt;div class=&quot;card&quot;&gt;&lt;h2&gt;Calificaciones por móvil&lt;/h2&gt;&lt;table&gt;&lt;tr&gt;&lt;th&gt;Móvil&lt;/th&gt;&lt;th&gt;★&lt;/th&gt;&lt;th&gt;Votos&lt;/th&gt;&lt;th&gt;Lo bueno&lt;/th&gt;&lt;th&gt;Lo malo&lt;/th&gt;&lt;/tr&gt;${CAL.map(c=&gt;`&lt;tr&gt;&lt;td&gt;${c.m}&lt;/td&gt;&lt;td&gt;${c.e.toFixed(1).replace(&#x27;.&#x27;,&#x27;,&#x27;)}&lt;/td&gt;&lt;td&gt;${c.n}&lt;/td&gt;&lt;td&gt;${Object.entries(c.b).map(([k,v])=&gt;k+&#x27; &#x27;+v).join(&#x27;, &#x27;)||&#x27;—&#x27;}&lt;/td&gt;&lt;td style=&quot;color:${Object.keys(c.ma).length?&#x27;var(--rojo)&#x27;:&#x27;&#x27;}&quot;&gt;${Object.entries(c.ma).map(([k,v])=&gt;k+&#x27; &#x27;+v).join(&#x27;, &#x27;)||&#x27;—&#x27;}&lt;/td&gt;&lt;/tr&gt;`).join(&#x27;&#x27;)}&lt;/table&gt;&lt;p class=&quot;hint&quot;&gt;Se cuentan los botones que marcan los clientes. Las observaciones escritas se leen aparte.&lt;/p&gt;&lt;/div&gt;`;}
+function vLog(){return `&lt;div class=&quot;card&quot;&gt;&lt;h2&gt;Registro de todo lo que pasa&lt;/h2&gt;&lt;div class=&quot;log&quot;&gt;${log.map(l=&gt;`&lt;div&gt;${esc(l)}&lt;/div&gt;`).join(&#x27;&#x27;)}&lt;/div&gt;&lt;/div&gt;`;}
+render();
+&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;" style="display:none"></iframe>
+<iframe id="f_directiva" srcdoc="&lt;!DOCTYPE html&gt;&lt;html lang=&quot;es&quot;&gt;&lt;head&gt;&lt;script&gt;
+window.T21={get(k,d){try{return JSON.parse(localStorage.getItem(&#x27;t21_&#x27;+k))??d}catch(e){return d}},
+set(k,v){localStorage.setItem(&#x27;t21_&#x27;+k,JSON.stringify(v));try{parent.postMessage({t21:k},&#x27;*&#x27;)}catch(e){}},
+push(k,v){const a=this.get(k,[]);a.unshift(v);this.set(k,a)}};
+&lt;/script&gt;&lt;meta charset=&quot;UTF-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;
+&lt;title&gt;Transporte 21 de Noviembre — Directiva&lt;/title&gt;
+&lt;style&gt;
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,Arial,sans-serif;background:#f4efe6;color:#2b2118}
+.aguayo{height:10px;background:repeating-linear-gradient(90deg,#c62828 0 18px,#f9a825 18px 30px,#2e7d32 30px 46px,#6a1b9a 46px 58px,#1565c0 58px 72px)}
+header{background:#5d2e0c;color:#fff;padding:12px 14px}header b{font-size:18px}header small{display:block;opacity:.8}
+nav{display:flex;overflow-x:auto;background:#fff;border-bottom:2px solid #e0d6c6}
+nav button{flex:1;min-width:96px;border:0;background:none;padding:12px 6px;font-weight:600;color:#6b5a48;cursor:pointer}
+nav button.on{color:#5d2e0c;border-bottom:3px solid #c62828}
+main{padding:12px;max-width:820px;margin:auto}.card{background:#fff;border-radius:12px;padding:12px;margin-bottom:10px;box-shadow:0 1px 3px #0002}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.tag{display:inline-block;padding:3px 9px;border-radius:20px;font-size:12px;font-weight:700;color:#fff}
+.fila{background:#2e7d32}.descanso{background:#78909c}.contrato{background:#1565c0}.delegado{background:#6a1b9a}.bloq{background:#c62828}.pend{background:#f9a825;color:#2b2118}
+.btn{border:0;border-radius:8px;padding:8px 12px;font-weight:700;cursor:pointer;background:#5d2e0c;color:#fff}
+.btn.g{background:#2e7d32}.btn.r{background:#c62828}.btn.l{background:#e8e0d2;color:#2b2118}
+.deuda{color:#c62828;font-weight:700}.ok{color:#2e7d32;font-weight:700}
+h3{margin:4px 0 10px}.muted{color:#7a6b5a;font-size:13px}input,select{padding:8px;border:1px solid #cbbfae;border-radius:8px}
+.log div{padding:6px 0;border-bottom:1px solid #eee;font-size:13px}
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#2b2118;color:#fff;padding:10px 16px;border-radius:10px;display:none}
+#modal .box{background:#fff;border-radius:14px;padding:16px;max-width:380px;width:100%}&lt;/style&gt;&lt;/head&gt;&lt;body&gt;
+&lt;div class=&quot;aguayo&quot;&gt;&lt;/div&gt;
+&lt;header&gt;&lt;b&gt;Directiva — Transporte 21 de Noviembre&lt;/b&gt;&lt;small&gt;Entrar como: &lt;select id=&quot;rol&quot; onchange=&quot;st.rol=this.value;draw()&quot; style=&quot;padding:4px&quot;&gt;&lt;option value=&quot;cajero&quot;&gt;Cajero&lt;/option&gt;&lt;option value=&quot;transporte&quot;&gt;Secretario de transporte&lt;/option&gt;&lt;option value=&quot;justicia&quot;&gt;Secretario de justicia&lt;/option&gt;&lt;option value=&quot;presidente&quot;&gt;Presidente&lt;/option&gt;&lt;option value=&quot;miembro&quot;&gt;Otro miembro&lt;/option&gt;&lt;/select&gt;&lt;/small&gt;&lt;/header&gt;
+&lt;nav id=&quot;nav&quot;&gt;&lt;/nav&gt;&lt;div id=&quot;buscaBox&quot; style=&quot;max-width:820px;margin:auto;padding:12px 12px 0&quot;&gt;&lt;input id=&quot;busca&quot; placeholder=&quot;🔍 Buscar por nombre o número de móvil&quot; style=&quot;width:100%;font-size:16px&quot; oninput=&quot;st.q=this.value.trim().toLowerCase();draw()&quot;&gt;&lt;/div&gt;&lt;main id=&quot;main&quot;&gt;&lt;/main&gt;&lt;div id=&quot;toast&quot;&gt;&lt;/div&gt;&lt;div id=&quot;modal&quot; style=&quot;display:none;position:fixed;inset:0;background:#0007;align-items:center;justify-content:center;padding:16px;z-index:9&quot;&gt;&lt;/div&gt;
+&lt;script&gt;
+const LIMITE_DEF=3;
+let st={emer:[{m:8,n:&#x27;Rubén Choque&#x27;,mot:&#x27;Fallecimiento de un familiar&#x27;,f:&#x27;Hoy 06:10&#x27;,e:&#x27;pend&#x27;}],limRecl:3,res:[{id:1,f:&#x27;02/11&#x27;,tipo:&#x27;obligacion&#x27;,txt:&#x27;Aseo de la terminal: cada móvil debe hacer su turno de limpieza&#x27;,plazo:&#x27;15/11&#x27;,cumplio:[12,21],venc:false}],recl:[{id:&#x27;R-4821&#x27;,m:5,f:&#x27;Hoy 07:40&#x27;,t:&#x27;Cobro de más&#x27;,d:&#x27;Me cobraron 60 Bs, el pasaje es 45.&#x27;,e:&#x27;nuevo&#x27;},{id:&#x27;R-4790&#x27;,m:17,f:&#x27;Ayer 18:20&#x27;,t:&#x27;Música muy fuerte · Manejo brusco&#x27;,d:&#x27;Iba muy rápido en las curvas.&#x27;,e:&#x27;nuevo&#x27;},{id:&#x27;R-4655&#x27;,m:17,f:&#x27;Hace 5 días&#x27;,t:&#x27;Mal trato&#x27;,d:&#x27;&#x27;,e:&#x27;resuelto&#x27;,r:&#x27;Se habló con el chofer&#x27;},{id:&#x27;R-4610&#x27;,m:17,f:&#x27;Hace 2 semanas&#x27;,t:&#x27;Cobro de más&#x27;,d:&#x27;&#x27;,e:&#x27;resuelto&#x27;,r:&#x27;Sanción al chofer&#x27;},{id:&#x27;R-4702&#x27;,m:12,f:&#x27;Hace 3 días&#x27;,t:&#x27;Vehículo sucio&#x27;,d:&#x27;&#x27;,e:&#x27;resuelto&#x27;,r:&#x27;Se habló con el chofer, ya limpió el móvil.&#x27;}],rol:&#x27;cajero&#x27;,q:&#x27;&#x27;,limite:LIMITE_DEF,aporte:25,cMes:30,cAnio:100,multa:25,cobrado:0,tab:&#x27;choferes&#x27;,
+choferes:[
+{n:&#x27;Fermín Rojas&#x27;,m:12,e:&#x27;fila&#x27;,deb:1,mes:1,anio:0,mul:0},{n:&#x27;Juan Mamani&#x27;,m:5,fm:1,e:&#x27;fila&#x27;,deb:2,mes:1,anio:0,mul:1},{n:&#x27;Rubén Choque&#x27;,m:8,fm:3,e:&#x27;contrato&#x27;,deb:1,mes:0,anio:1,mul:0},
+{n:&#x27;Pedro Vargas&#x27;,m:3,e:&#x27;descanso&#x27;,deb:0,mes:2,anio:0,mul:0},{n:&#x27;Marcos Quispe&#x27;,m:17,e:&#x27;fila&#x27;,deb:3,mes:0,anio:0,mul:2},{n:&#x27;Elías Flores&#x27;,m:21,e:&#x27;delegado&#x27;,deb:0,mes:0,anio:0,mul:0,mot:&#x27;Trabajo comunal: arreglo del camino&#x27;}],
+clientes:[{n:&#x27;Ana Cruz&#x27;,f:3,b:true},{n:&#x27;Luis Paz&#x27;,f:1,b:false}],
+perdidos:[{n:&#x27;Pedro Vargas&#x27;,m:3,mot:&#x27;Perdió turno por reunión de directiva&#x27;}],
+pend:[{t:&#x27;Chofer&#x27;,n:&#x27;Daniel Arce&#x27;,d:&#x27;Chofer del móvil 9 (dueño: Juan Mamani)&#x27;},
+{t:&#x27;Vehículo&#x27;,n:&#x27;Móvil 25 · placa 3456-KTR&#x27;,d:&#x27;Plano: 18 asientos físicos → por la fila sale con 14; los 18 solo en contrato&#x27;},
+{t:&#x27;Dueño&#x27;,n:&#x27;Rosa Gutiérrez&#x27;,d:&#x27;Dueña nueva, 1 vehículo&#x27;}],
+log:[]};
+function hora(){return new Date().toLocaleTimeString(&#x27;es-BO&#x27;,{hour:&#x27;2-digit&#x27;,minute:&#x27;2-digit&#x27;})}
+function reg(t){st.log.unshift(hora()+&#x27; · &#x27;+t)}
+function toast(t){const x=document.getElementById(&#x27;toast&#x27;);x.textContent=t;x.style.display=&#x27;block&#x27;;clearTimeout(x._t);x._t=setTimeout(()=&gt;x.style.display=&#x27;none&#x27;,2500)}
+function total(c){return c.deb*st.aporte+c.mes*st.cMes+c.anio*st.cAnio+c.mul*st.multa}
+function detalle(c){let d=[];if(c.deb)d.push(c.deb+&#x27; salida(s) &#x27;+c.deb*st.aporte+&#x27; Bs&#x27;);if(c.mes)d.push(c.mes+&#x27; mes(es) &#x27;+c.mes*st.cMes+&#x27; Bs&#x27;);if(c.anio)d.push(&#x27;cuota anual &#x27;+c.anio*st.cAnio+&#x27; Bs&#x27;);if(c.mul)d.push(c.mul+&#x27; multa(s) &#x27;+c.mul*st.multa+&#x27; Bs&#x27;);return d.join(&#x27; · &#x27;)}
+function bloqueado(c){return c.deb&gt;=st.limite}
+const NOM={fila:&#x27;En la fila&#x27;,descanso:&#x27;Descansa&#x27;,contrato:&#x27;Con contrato&#x27;,delegado:&#x27;Delegado&#x27;};
+const TABS=[[&#x27;choferes&#x27;,&#x27;Choferes&#x27;],[&#x27;aportes&#x27;,&#x27;Cuentas de choferes&#x27;],[&#x27;delegar&#x27;,&#x27;Delegar y turnos&#x27;],[&#x27;faltas&#x27;,&#x27;Faltas y bloqueos&#x27;],[&#x27;registros&#x27;,&#x27;Aprobar registros&#x27;],[&#x27;calidad&#x27;,&#x27;Calidad de servicio&#x27;],[&#x27;reclamos&#x27;,&#x27;Reclamos&#x27;],[&#x27;resol&#x27;,&#x27;Resoluciones&#x27;],[&#x27;log&#x27;,&#x27;Registro&#x27;]];
+function nav(){document.getElementById(&#x27;nav&#x27;).innerHTML=TABS.map(t=&gt;`&lt;button class=&quot;${st.tab==t[0]?&#x27;on&#x27;:&#x27;&#x27;}&quot; onclick=&quot;ir(&#x27;${t[0]}&#x27;)&quot;&gt;${t[1]}&lt;/button&gt;`).join(&#x27;&#x27;)}
+function ir(t){st.tab=t;draw()}
+function estado(c){if(c.susp)return `&lt;span class=&quot;tag bloq&quot;&gt;Suspendido&lt;/span&gt;`;return bloqueado(c)?&#x27;&lt;span class=&quot;tag bloq&quot;&gt;Bloqueado por deuda&lt;/span&gt;&#x27;:`&lt;span class=&quot;tag ${c.e}&quot;&gt;${NOM[c.e]}&lt;/span&gt;`}
+function ver(c){return !st.q||c.n.toLowerCase().includes(st.q)||String(c.m)==st.q.replace(/\D/g,&#x27;&#x27;)}
+function caj(){return st.rol==&#x27;cajero&#x27;}
+function ju(){return st.rol==&#x27;justicia&#x27;}
+function tr(){return st.rol==&#x27;transporte&#x27;}
+const SOLO=&#x27;&lt;p class=&quot;muted&quot;&gt;👁️ Solo ver. Esta parte la maneja el secretario de transporte.&lt;/p&gt;&#x27;;
+function t21Cta(m){const c=window.T21?T21.get(&#x27;ctas&#x27;,{}):{};return c[m]||{extra:0,pago:false}}
+function t21SetCta(m,v){if(!window.T21)return;const c=T21.get(&#x27;ctas&#x27;,{});c[m]=Object.assign(t21Cta(m),v);T21.set(&#x27;ctas&#x27;,c)}
+window.t21Sync=function(){if(!window.T21)return;let ch=false;st.choferes.forEach(c=&gt;{const x=t21Cta(c.m);c._ap=c._ap||0;if(x.extra&gt;c._ap){const n=x.extra-c._ap;c.deb+=n;c._ap=x.extra;reg(`Oficina: móvil ${c.m} salió sin pagar el aporte (${n})`);ch=true}});
+const cb=T21.get(&#x27;cobros&#x27;,[]);if(cb.length&gt;(st._cb||0)){cb.slice(0,cb.length-(st._cb||0)).forEach(k=&gt;{st.cobrado+=k.monto;reg(`Oficina cobró aporte del móvil ${k.m}: ${k.monto} Bs`)});st._cb=cb.length;ch=true}
+T21.get(&#x27;recl&#x27;,[]).slice().reverse().forEach(x=&gt;{if(!st.recl.some(y=&gt;y.id==x.id)){st.recl.unshift(x);reg(`📲 Nuevo reclamo formal ${x.id} contra el móvil ${x.m}`);toast(&#x27;Nuevo reclamo &#x27;+x.id);ch=true}});
+if(ch)draw()};window.addEventListener(&#x27;storage&#x27;,()=&gt;window.t21Sync());setTimeout(()=&gt;window.t21Sync(),300);
+function draw(){nav();document.getElementById(&#x27;buscaBox&#x27;).style.display=[&#x27;choferes&#x27;,&#x27;aportes&#x27;,&#x27;delegar&#x27;,&#x27;faltas&#x27;,&#x27;calidad&#x27;,&#x27;reclamos&#x27;].includes(st.tab)?&#x27;block&#x27;:&#x27;none&#x27;;const m=document.getElementById(&#x27;main&#x27;);let h=&#x27;&#x27;;
+if(st.tab==&#x27;choferes&#x27;){h=&#x27;&lt;h3&gt;Choferes del sindicato&lt;/h3&gt;&#x27;+(st.choferes.filter(ver).map(c=&gt;`&lt;div class=&quot;card row&quot;&gt;&lt;div&gt;&lt;b&gt;Móvil ${c.m}&lt;/b&gt; · ${c.n}&lt;div class=&quot;muted&quot;&gt;${c.mot||&#x27;&#x27;}${c.fm?`&lt;span class=&quot;${c.fm&gt;2?&#x27;deuda&#x27;:&#x27;&#x27;}&quot;&gt;🔧 ${c.fm} falla(s) mecánica(s) este mes${c.fm&gt;2?&#x27; — pasa el límite&#x27;:&#x27;&#x27;}&lt;/span&gt;`:&#x27;&#x27;}&lt;/div&gt;&lt;/div&gt;&lt;div&gt;${estado(c)} ${total(c)?`&lt;span class=&quot;deuda&quot;&gt;Debe ${total(c)} Bs&lt;/span&gt;`:&#x27;&lt;span class=&quot;ok&quot;&gt;Al día&lt;/span&gt;&#x27;}&lt;/div&gt;&lt;/div&gt;`).join(&#x27;&#x27;)||&#x27;&lt;p class=&quot;muted&quot;&gt;No se encontró ningún chofer.&lt;/p&gt;&#x27;)}
+if(st.tab==&#x27;aportes&#x27;){const deben=st.choferes.filter(total).filter(ver),porCobrar=st.choferes.reduce((a,c)=&gt;a+total(c),0);
+const inp=(k,lbl,w)=&gt;`&lt;label&gt;${lbl} &lt;input type=&quot;number&quot; disabled value=&quot;${st[k]}&quot; style=&quot;width:${w||70}px&quot; onchange=&quot;st[&#x27;${k}&#x27;]=+this.value;reg(&#x27;${lbl}: &#x27;+this.value);draw()&quot;&gt;&lt;/label&gt;`;
+h=`&lt;h3&gt;Cuentas de choferes&lt;/h3&gt;${caj()?&#x27;&lt;p class=&quot;muted&quot;&gt;Eres el cajero: apruebas los pagos con tu código. Lo aprobado entra a la caja cerrada y no se puede deshacer.&lt;/p&gt;&#x27;:&#x27;&lt;p class=&quot;muted&quot;&gt;👁️ Solo ver. Los pagos los aprueba el cajero.&lt;/p&gt;&#x27;}&lt;div class=&quot;card row&quot; style=&quot;text-align:center&quot;&gt;&lt;div&gt;&lt;b class=&quot;ok&quot; style=&quot;font-size:20px&quot;&gt;${st.cobrado} Bs&lt;/b&gt;&lt;div class=&quot;muted&quot;&gt;Cobrado&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;b class=&quot;deuda&quot; style=&quot;font-size:20px&quot;&gt;${porCobrar} Bs&lt;/b&gt;&lt;div class=&quot;muted&quot;&gt;Por cobrar&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;b style=&quot;font-size:20px&quot;&gt;${deben.length} / ${st.choferes.length}&lt;/b&gt;&lt;div class=&quot;muted&quot;&gt;Choferes que deben&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&quot;card&quot;&gt;&lt;div class=&quot;row&quot;&gt;${inp(&#x27;aporte&#x27;,&#x27;Aporte por salida (Bs)&#x27;)} ${inp(&#x27;cMes&#x27;,&#x27;Cuota mensual (Bs)&#x27;)} ${inp(&#x27;cAnio&#x27;,&#x27;Cuota anual (Bs)&#x27;)} ${inp(&#x27;multa&#x27;,&#x27;Multa (Bs)&#x27;)} ${inp(&#x27;limite&#x27;,&#x27;Bloquear con salidas sin pagar&#x27;,60)}&lt;/div&gt;
+&lt;p class=&quot;muted&quot;&gt;🔒 Montos fijos: los acuerda la directiva en reunión y quedan fijos en la app; nadie los cambia desde aquí (montos de ejemplo). El aporte de cada salida lo cobra la secretaria en la oficina al despachar; aquí la directiva solo controla. Al llegar al límite, la app bloquea al chofer.&lt;/p&gt;&lt;/div&gt;
+&lt;h3&gt;Deben&lt;/h3&gt;`+(deben.map(c=&gt;{const i=st.choferes.indexOf(c);return `&lt;div class=&quot;card&quot;&gt;&lt;div class=&quot;row&quot;&gt;&lt;div&gt;&lt;b&gt;Móvil ${c.m}&lt;/b&gt; · ${c.n} ${bloqueado(c)?&#x27;&lt;span class=&quot;tag bloq&quot;&gt;Bloqueado&lt;/span&gt;&#x27;:&#x27;&#x27;}&lt;div class=&quot;muted&quot;&gt;${detalle(c)}${c.deb==st.limite-1?&#x27; · ⚠️ una salida más y se bloquea&#x27;:&#x27;&#x27;}&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;span class=&quot;deuda&quot;&gt;${total(c)} Bs&lt;/span&gt; ${caj()?`&lt;button class=&quot;btn g&quot; onclick=&quot;pagar(${i})&quot;&gt;Aprobar pago&lt;/button&gt;`:&#x27;&#x27;}&lt;/div&gt;&lt;/div&gt;
+${caj()?`&lt;div style=&quot;margin-top:8px&quot;&gt;&lt;button class=&quot;btn l&quot; onclick=&quot;salida(${i})&quot;&gt;+ salida (demo)&lt;/button&gt; &lt;button class=&quot;btn l&quot; onclick=&quot;cargo(${i},&#x27;mul&#x27;)&quot;&gt;+ multa&lt;/button&gt;&lt;/div&gt;`:&#x27;&#x27;}&lt;/div&gt;`}).join(&#x27;&#x27;)||&#x27;&lt;p class=&quot;muted&quot;&gt;Todos al día.&lt;/p&gt;&#x27;)+
+&#x27;&lt;h3&gt;Al día&lt;/h3&gt;&#x27;+(st.choferes.filter(c=&gt;!total(c)).filter(ver).map(c=&gt;{const i=st.choferes.indexOf(c);return `&lt;div class=&quot;card row&quot;&gt;&lt;span&gt;&lt;b&gt;Móvil ${c.m}&lt;/b&gt; · ${c.n}&lt;/span&gt;&lt;div&gt;&lt;span class=&quot;ok&quot;&gt;Al día&lt;/span&gt; ${caj()?`&lt;button class=&quot;btn l&quot; onclick=&quot;salida(${i})&quot;&gt;+ salida (demo)&lt;/button&gt;`:&#x27;&#x27;}&lt;/div&gt;&lt;/div&gt;`}).join(&#x27;&#x27;)||&#x27;&lt;p class=&quot;muted&quot;&gt;Ninguno.&lt;/p&gt;&#x27;)+
+(caj()?`&lt;div class=&quot;card row&quot;&gt;&lt;span&gt;Cobrar a todos el mes nuevo / el año nuevo&lt;/span&gt;&lt;div&gt;&lt;button class=&quot;btn&quot; onclick=&quot;cobrarTodos(&#x27;mes&#x27;)&quot;&gt;+ cuota mensual&lt;/button&gt; &lt;button class=&quot;btn&quot; onclick=&quot;cobrarTodos(&#x27;anio&#x27;)&quot;&gt;+ cuota anual&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;`:&#x27;&#x27;)}
+if(st.tab==&#x27;delegar&#x27;){h=(tr()?&#x27;&#x27;:SOLO)+&#x27;&lt;h3&gt;Delegar a un trabajo de la organización&lt;/h3&gt;&lt;p class=&quot;muted&quot;&gt;El chofer sale de la fila sin perder su derecho y sin sanción.&lt;/p&gt;&#x27;+
+st.choferes.filter(c=&gt;(c.e==&#x27;fila&#x27;||c.e==&#x27;descanso&#x27;)&amp;&amp;ver(c)).map(c=&gt;`&lt;div class=&quot;card row&quot;&gt;&lt;span&gt;&lt;b&gt;Móvil ${c.m}&lt;/b&gt; · ${c.n}&lt;/span&gt;${tr()?`&lt;button class=&quot;btn&quot; onclick=&quot;delegar(${st.choferes.indexOf(c)})&quot;&gt;Delegar&lt;/button&gt;`:&#x27;&#x27;}&lt;/div&gt;`).join(&#x27;&#x27;)+
+&#x27;&lt;h3&gt;Delegados ahora&lt;/h3&gt;&#x27;+(st.choferes.filter(c=&gt;c.e==&#x27;delegado&#x27;).map(c=&gt;`&lt;div class=&quot;card row&quot;&gt;&lt;div&gt;&lt;b&gt;Móvil ${c.m}&lt;/b&gt; · ${c.n}&lt;div class=&quot;muted&quot;&gt;${c.mot}&lt;/div&gt;&lt;/div&gt;${tr()?`&lt;button class=&quot;btn g&quot; onclick=&quot;volver(${st.choferes.indexOf(c)})&quot;&gt;Terminó → vuelve a su puesto&lt;/button&gt;`:&#x27;&#x27;}&lt;/div&gt;`).join(&#x27;&#x27;)||&#x27;&lt;p class=&quot;muted&quot;&gt;Nadie delegado.&lt;/p&gt;&#x27;)+
+&#x27;&lt;h3&gt;Retiros por emergencia (justificar)&lt;/h3&gt;&lt;p class=&quot;muted&quot;&gt;Choferes que se retiraron cuando ya les tocaba. Si se justifica, no cuenta como falta.&lt;/p&gt;&#x27;+(st.emer.map((x,i)=&gt;`&lt;div class=&quot;card row&quot;&gt;&lt;div&gt;&lt;b&gt;Móvil ${x.m}&lt;/b&gt; · ${x.n}&lt;div class=&quot;muted&quot;&gt;${x.f} · ${x.mot}&lt;/div&gt;&lt;/div&gt;${x.e==&#x27;pend&#x27;?(tr()?`&lt;div&gt;&lt;button class=&quot;btn g&quot; onclick=&quot;justif(${i},1)&quot;&gt;Justificar&lt;/button&gt; &lt;button class=&quot;btn r&quot; onclick=&quot;justif(${i},0)&quot;&gt;No justificar (falta)&lt;/button&gt;&lt;/div&gt;`:&#x27;&lt;span class=&quot;tag pend&quot;&gt;Pendiente&lt;/span&gt;&#x27;):`&lt;span class=&quot;tag ${x.e==&#x27;ok&#x27;?&#x27;fila&#x27;:&#x27;bloq&#x27;}&quot;&gt;${x.e==&#x27;ok&#x27;?&#x27;Justificado&#x27;:&#x27;Falta&#x27;}&lt;/span&gt;`}&lt;/div&gt;`).join(&#x27;&#x27;)||&#x27;&lt;p class=&quot;muted&quot;&gt;Ninguno.&lt;/p&gt;&#x27;)+&#x27;&lt;h3&gt;Habilitar turno perdido&lt;/h3&gt;&#x27;+(st.perdidos.map((p,i)=&gt;`&lt;div class=&quot;card row&quot;&gt;&lt;div&gt;&lt;b&gt;Móvil ${p.m}&lt;/b&gt; · ${p.n}&lt;div class=&quot;muted&quot;&gt;${p.mot}&lt;/div&gt;&lt;/div&gt;${tr()?`&lt;button class=&quot;btn g&quot; onclick=&quot;habilitar(${i})&quot;&gt;Habilitar&lt;/button&gt;`:&#x27;&#x27;}&lt;/div&gt;`).join(&#x27;&#x27;)||&#x27;&lt;p class=&quot;muted&quot;&gt;No hay turnos por habilitar.&lt;/p&gt;&#x27;)}
+if(st.tab==&#x27;faltas&#x27;){h=&#x27;&lt;h3&gt;Choferes bloqueados&lt;/h3&gt;&#x27;+(st.choferes.filter(bloqueado).filter(ver).map(c=&gt;`&lt;div class=&quot;card row&quot;&gt;&lt;div&gt;&lt;b&gt;Móvil ${c.m}&lt;/b&gt; · ${c.n}&lt;div class=&quot;muted&quot;&gt;${detalle(c)} · total ${total(c)} Bs&lt;/div&gt;&lt;/div&gt;${caj()?`&lt;button class=&quot;btn g&quot; onclick=&quot;pagar(${st.choferes.indexOf(c)})&quot;&gt;Aprobar pago → desbloquear&lt;/button&gt;`:&#x27;&lt;span class=&quot;muted&quot;&gt;Desbloquea el cajero&lt;/span&gt;&#x27;}&lt;/div&gt;`).join(&#x27;&#x27;)||&#x27;&lt;p class=&quot;muted&quot;&gt;Ninguno.&lt;/p&gt;&#x27;)+
+&#x27;&lt;h3&gt;Clientes con faltas&lt;/h3&gt;&lt;p class=&quot;muted&quot;&gt;Reservaron y no se presentaron.&lt;/p&gt;&#x27;+st.clientes.map((c,i)=&gt;`&lt;div class=&quot;card row&quot;&gt;&lt;div&gt;&lt;b&gt;${c.n}&lt;/b&gt;&lt;div class=&quot;muted&quot;&gt;${c.f} falta(s)&lt;/div&gt;&lt;/div&gt;&lt;div&gt;${c.b?`&lt;span class=&quot;tag bloq&quot;&gt;Bloqueado&lt;/span&gt; ${tr()?`&lt;button class=&quot;btn l&quot; onclick=&quot;desbloq(${i})&quot;&gt;Quitar bloqueo&lt;/button&gt;`:&#x27;&#x27;}`:&#x27;&lt;span class=&quot;ok&quot;&gt;Puede reservar&lt;/span&gt;&#x27;}&lt;/div&gt;&lt;/div&gt;`).join(&#x27;&#x27;)}
+if(st.tab==&#x27;registros&#x27;){h=(tr()?&#x27;&#x27;:SOLO)+&#x27;&lt;h3&gt;Registros por aprobar&lt;/h3&gt;&lt;p class=&quot;muted&quot;&gt;Nada entra a la fila sin aprobación de la directiva.&lt;/p&gt;&#x27;+(st.pend.map((p,i)=&gt;`&lt;div class=&quot;card&quot;&gt;&lt;div class=&quot;row&quot;&gt;&lt;div&gt;&lt;span class=&quot;tag pend&quot;&gt;${p.t}&lt;/span&gt; &lt;b&gt;${p.n}&lt;/b&gt;&lt;div class=&quot;muted&quot;&gt;${p.d}&lt;/div&gt;&lt;/div&gt;${tr()?`&lt;div&gt;&lt;button class=&quot;btn g&quot; onclick=&quot;aprobar(${i},1)&quot;&gt;Aprobar&lt;/button&gt; &lt;button class=&quot;btn r&quot; onclick=&quot;aprobar(${i},0)&quot;&gt;Rechazar&lt;/button&gt;&lt;/div&gt;`:&#x27;&#x27;}&lt;/div&gt;&lt;/div&gt;`).join(&#x27;&#x27;)||&#x27;&lt;p class=&quot;muted&quot;&gt;No hay pendientes.&lt;/p&gt;&#x27;)}
+if(st.tab==&#x27;calidad&#x27;){const Q=[{m:12,e:4.7,n:31,b:&#x27;Buen trato, vehículo limpio&#x27;,x:&#x27;Paró demasiado (2)&#x27;},{m:5,e:4.1,n:40,b:&#x27;Puntual&#x27;,x:&#x27;Cobro de más (5), mal trato (3)&#x27;},{m:17,e:3.6,n:22,b:&#x27;Puntual&#x27;,x:&#x27;Manejo brusco (6), vehículo sucio (4)&#x27;},{m:21,e:4.9,n:14,b:&#x27;Cómodo, manejo seguro&#x27;,x:&#x27;—&#x27;}].filter(q=&gt;!st.q||String(q.m)==st.q.replace(/\D/g,&#x27;&#x27;));
+h=(tr()?&#x27;&lt;p class=&quot;muted&quot;&gt;Revisa las quejas y llama la atención al chofer si hace falta.&lt;/p&gt;&#x27;:SOLO)+&#x27;&lt;h3&gt;Calidad de servicio&lt;/h3&gt;&#x27;+Q.sort((a,b)=&gt;a.e-b.e).map(q=&gt;`&lt;div class=&quot;card&quot;&gt;&lt;div class=&quot;row&quot;&gt;&lt;b&gt;Móvil ${q.m}&lt;/b&gt;&lt;span&gt;${&#x27;★&#x27;.repeat(Math.round(q.e))} ${q.e.toFixed(1)} · ${q.n} votos&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;muted&quot;&gt;👍 ${q.b}&lt;/div&gt;&lt;div class=&quot;${q.e&lt;4?&#x27;deuda&#x27;:&#x27;muted&#x27;}&quot;&gt;👎 ${q.x}&lt;/div&gt;${tr()&amp;&amp;q.e&lt;4?`&lt;button class=&quot;btn r&quot; style=&quot;margin-top:8px&quot; onclick=&quot;reg(&#x27;Llamada de atención al móvil ${q.m} por calidad de servicio&#x27;);toast(&#x27;Llamada de atención registrada&#x27;);draw()&quot;&gt;Llamada de atención&lt;/button&gt;`:&#x27;&#x27;}&lt;/div&gt;`).join(&#x27;&#x27;)}
+if(st.tab==&#x27;reclamos&#x27;){const R=st.recl.filter(r=&gt;!st.q||String(r.m)==st.q.replace(/\D/g,&#x27;&#x27;));const SJ=&#x27;&lt;p class=&quot;muted&quot;&gt;👁️ Solo ver. Los reclamos los atiende el secretario de justicia.&lt;/p&gt;&#x27;;
+h=(ju()?&#x27;&lt;p class=&quot;muted&quot;&gt;Revisa cada reclamo, habla con el chofer y registra la respuesta. Nada se borra.&lt;/p&gt;&#x27;:SJ)+&#x27;&lt;h3&gt;Reclamos de pasajeros&lt;/h3&gt;&#x27;+R.map(r=&gt;{const i=st.recl.indexOf(r);return `&lt;div class=&quot;card&quot;&gt;&lt;div class=&quot;row&quot;&gt;&lt;b&gt;${r.id} · Móvil ${r.m}&lt;/b&gt;&lt;span class=&quot;tag ${r.e==&#x27;nuevo&#x27;?&#x27;bloq&#x27;:&#x27;fila&#x27;}&quot;&gt;${r.e==&#x27;nuevo&#x27;?&#x27;Nuevo&#x27;:&#x27;Resuelto&#x27;}&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;muted&quot;&gt;${r.f}&lt;/div&gt;&lt;div class=&quot;deuda&quot;&gt;👎 ${r.t}&lt;/div&gt;${r.d?`&lt;div&gt;“${r.d}”&lt;/div&gt;`:&#x27;&#x27;}${r.r?`&lt;div class=&quot;ok&quot;&gt;✔ ${r.r}&lt;/div&gt;`:&#x27;&#x27;}${ju()&amp;&amp;r.e==&#x27;nuevo&#x27;?`&lt;div style=&quot;margin-top:8px&quot;&gt;&lt;button class=&quot;btn g&quot; onclick=&quot;resolver(${i},&#x27;Se habló con el chofer&#x27;)&quot;&gt;Se habló con el chofer&lt;/button&gt; &lt;button class=&quot;btn r&quot; onclick=&quot;resolver(${i},&#x27;Sanción al chofer&#x27;)&quot;&gt;Sanción&lt;/button&gt; &lt;button class=&quot;btn l&quot; onclick=&quot;resolver(${i},&#x27;Reclamo sin fundamento&#x27;)&quot;&gt;Sin fundamento&lt;/button&gt;&lt;/div&gt;`:&#x27;&#x27;}&lt;/div&gt;`}).join(&#x27;&#x27;)}
+if(st.tab==&#x27;resol&#x27;){const SJ=&#x27;&lt;p class=&quot;muted&quot;&gt;👁️ Solo ver. Las resoluciones las registra el secretario de justicia.&lt;/p&gt;&#x27;;
+h=(ju()?`&lt;div class=&quot;card&quot;&gt;&lt;h3&gt;Registrar resolución de reunión&lt;/h3&gt;
+&lt;label&gt;Tipo &lt;select id=&quot;rTipo&quot; onchange=&quot;draw2()&quot;&gt;&lt;option value=&quot;sancion&quot;&gt;Sanción a un móvil&lt;/option&gt;&lt;option value=&quot;obligacion&quot;&gt;Obligación para todos (ej. aseo)&lt;/option&gt;&lt;/select&gt;&lt;/label&gt;
+&lt;div id=&quot;rCampos&quot; style=&quot;margin-top:8px&quot;&gt;&lt;/div&gt;&lt;button class=&quot;btn g&quot; style=&quot;margin-top:8px&quot; onclick=&quot;nuevaRes()&quot;&gt;Registrar resolución&lt;/button&gt;
+&lt;p class=&quot;muted&quot;&gt;Con cuidado: en la app solo se escribe la decisión, no acusaciones ni detalles personales. El acta completa queda en el libro del sindicato.&lt;/p&gt;&lt;/div&gt;`:SJ)+
+`&lt;div class=&quot;card&quot;&gt;&lt;b&gt;Regla automática:&lt;/b&gt; con ${st.limRecl} reclamos con fundamento en un mes, el móvil se suspende solo 7 días y se avisa a la directiva.&lt;/div&gt;&lt;h3&gt;Resoluciones registradas&lt;/h3&gt;`+
+(st.res.slice().reverse().map(r=&gt;{if(r.tipo==&#x27;sancion&#x27;)return `&lt;div class=&quot;card&quot;&gt;&lt;div class=&quot;row&quot;&gt;&lt;b&gt;Reunión ${r.f} · Móvil ${r.m}&lt;/b&gt;&lt;span class=&quot;tag bloq&quot;&gt;${r.dias?&#x27;Suspendido &#x27;+r.dias+&#x27; días&#x27;:&#x27;Retirado&#x27;}&lt;/span&gt;&lt;/div&gt;&lt;div&gt;${r.txt}&lt;/div&gt;&lt;div class=&quot;muted&quot;&gt;La app lo sacó de la fila y no lo deja anotarse${r.dias?&#x27; hasta cumplir la sanción&#x27;:&#x27;&#x27;}.&lt;/div&gt;&lt;/div&gt;`;
+const falta=st.choferes.filter(c=&gt;!r.cumplio.includes(c.m));
+return `&lt;div class=&quot;card&quot;&gt;&lt;div class=&quot;row&quot;&gt;&lt;b&gt;Reunión ${r.f} · Para todos&lt;/b&gt;&lt;span class=&quot;tag ${r.venc?&#x27;bloq&#x27;:&#x27;pend&#x27;}&quot;&gt;${r.venc?&#x27;Plazo vencido&#x27;:&#x27;Plazo: &#x27;+r.plazo}&lt;/span&gt;&lt;/div&gt;&lt;div&gt;${r.txt}&lt;/div&gt;
+&lt;div class=&quot;muted&quot;&gt;Cumplieron: ${r.cumplio.map(m=&gt;&#x27;Móvil &#x27;+m).join(&#x27;, &#x27;)||&#x27;nadie&#x27;}&lt;/div&gt;
+${falta.map(c=&gt;`&lt;div class=&quot;row&quot; style=&quot;border-top:1px solid #eee;padding:4px 0&quot;&gt;&lt;span&gt;Móvil ${c.m} · ${c.n} ${c.susp?&#x27;&lt;span class=&quot;tag bloq&quot;&gt;Suspendido&lt;/span&gt;&#x27;:&#x27;&#x27;}&lt;/span&gt;${ju()&amp;&amp;!r.venc?`&lt;button class=&quot;btn l&quot; onclick=&quot;cumplio(${r.id},${c.m})&quot;&gt;Cumplió&lt;/button&gt;`:&#x27;&#x27;}&lt;/div&gt;`).join(&#x27;&#x27;)}
+${ju()&amp;&amp;!r.venc?`&lt;button class=&quot;btn r&quot; style=&quot;margin-top:8px&quot; onclick=&quot;vencer(${r.id})&quot;&gt;Demo: venció el plazo&lt;/button&gt;`:&#x27;&#x27;}&lt;/div&gt;`}).join(&#x27;&#x27;))}
+if(st.tab==&#x27;log&#x27;){h=&#x27;&lt;h3&gt;Registro de la directiva&lt;/h3&gt;&lt;div class=&quot;card log&quot;&gt;&#x27;+(st.log.map(l=&gt;`&lt;div&gt;${l}&lt;/div&gt;`).join(&#x27;&#x27;)||&#x27;&lt;div class=&quot;muted&quot;&gt;Sin movimientos todavía.&lt;/div&gt;&#x27;)+&#x27;&lt;/div&gt;&lt;p class=&quot;muted&quot;&gt;Este registro no se puede borrar ni cambiar. Los pagos aprobados quedan cerrados en la caja.&lt;/p&gt;&#x27;}
+m.innerHTML=h;if(st.tab==&#x27;resol&#x27;&amp;&amp;document.getElementById(&#x27;rTipo&#x27;))draw2()}
+function pagar(i){const c=st.choferes[i];const b=document.getElementById(&#x27;modal&#x27;);b.innerHTML=`&lt;div class=&quot;box&quot;&gt;&lt;h3&gt;Aprobar pago · Móvil ${c.m}&lt;/h3&gt;&lt;p&gt;&lt;b&gt;${c.n}&lt;/b&gt; paga &lt;b class=&quot;deuda&quot;&gt;${total(c)} Bs&lt;/b&gt;&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;${detalle(c)}&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;⚠️ Una vez aprobado entra a la caja y NO se puede deshacer.&lt;/p&gt;&lt;label&gt;Código del cajero (demo: 1234)&lt;br&gt;&lt;input id=&quot;cod&quot; type=&quot;password&quot; inputmode=&quot;numeric&quot; style=&quot;width:100%;font-size:22px;margin-top:6px&quot;&gt;&lt;/label&gt;&lt;div id=&quot;err&quot; class=&quot;deuda&quot;&gt;&lt;/div&gt;&lt;div class=&quot;row&quot; style=&quot;margin-top:10px&quot;&gt;&lt;button class=&quot;btn l&quot; onclick=&quot;cerrar()&quot;&gt;Cancelar&lt;/button&gt;&lt;button class=&quot;btn g&quot; onclick=&quot;confirmar(${i})&quot;&gt;Aprobar&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;`;b.style.display=&#x27;flex&#x27;;setTimeout(()=&gt;document.getElementById(&#x27;cod&#x27;).focus(),50)}
+function cerrar(){document.getElementById(&#x27;modal&#x27;).style.display=&#x27;none&#x27;}
+function confirmar(i){if(document.getElementById(&#x27;cod&#x27;).value!==&#x27;1234&#x27;){document.getElementById(&#x27;err&#x27;).textContent=&#x27;Código incorrecto&#x27;;return}const c=st.choferes[i];const t=total(c);st.cobrado+=t;reg(`🔒 Cajero aprobó pago del móvil ${c.m}: ${t} Bs (${detalle(c)})`);const b=bloqueado(c);c.deb=0;c.mes=0;c.anio=0;c.mul=0;c._ap=0;t21SetCta(c.m,{extra:0,pago:true,ok12:true});cerrar();toast(b?&#x27;Pago aprobado y desbloqueado&#x27;:&#x27;Pago aprobado y cerrado en caja&#x27;);draw()}
+function salida(i){const c=st.choferes[i];c.deb++;reg(`Salida del móvil ${c.m}: aporte de ${st.aporte} Bs anotado`);if(bloqueado(c)){reg(`Móvil ${c.m} bloqueado por deuda`);toast(&#x27;Móvil &#x27;+c.m+&#x27; bloqueado: sale de la fila&#x27;)}draw()}
+function delegar(i){const mot=prompt(&#x27;¿Para qué trabajo lo delegan?&#x27;,&#x27;Trabajo de la organización&#x27;)||&#x27;Trabajo de la organización&#x27;;const c=st.choferes[i];c.prev=c.e;c.e=&#x27;delegado&#x27;;c.mot=mot;reg(`Móvil ${c.m} delegado: ${mot}`);toast(&#x27;Delegado sin perder su derecho&#x27;);draw()}
+function volver(i){const c=st.choferes[i];c.e=c.prev||&#x27;fila&#x27;;c.mot=&#x27;&#x27;;reg(`Móvil ${c.m} terminó la delegación y vuelve a su puesto`);draw()}
+function habilitar(i){const p=st.perdidos.splice(i,1)[0];const c=st.choferes.find(x=&gt;x.m==p.m);if(c)c.e=&#x27;fila&#x27;;reg(`Turno habilitado al móvil ${p.m}`);toast(&#x27;Turno habilitado&#x27;);draw()}
+function cargo(i,k){const c=st.choferes[i];const mot=prompt(&#x27;Motivo de la multa&#x27;,&#x27;Falta a reunión&#x27;)||&#x27;Falta a reunión&#x27;;c.mul++;reg(`Multa de ${st.multa} Bs al móvil ${c.m}: ${mot}`);draw()}
+function cobrarTodos(k){st.choferes.forEach(c=&gt;c[k]++);reg(k==&#x27;mes&#x27;?&#x27;Cuota mensual cargada a todos&#x27;:&#x27;Cuota anual cargada a todos&#x27;);toast(&#x27;Cuota cargada a todos los choferes&#x27;);draw()}
+function draw2(){const t=document.getElementById(&#x27;rTipo&#x27;).value,o=st.choferes.map(c=&gt;`&lt;option value=&quot;${c.m}&quot;&gt;Móvil ${c.m} · ${c.n}&lt;/option&gt;`).join(&#x27;&#x27;);
+document.getElementById(&#x27;rCampos&#x27;).innerHTML=t==&#x27;sancion&#x27;?`&lt;label&gt;Móvil &lt;select id=&quot;rM&quot;&gt;${o}&lt;/select&gt;&lt;/label&gt; &lt;label&gt;Sanción &lt;select id=&quot;rS&quot;&gt;&lt;option value=&quot;7&quot;&gt;Suspensión 7 días&lt;/option&gt;&lt;option value=&quot;15&quot;&gt;Suspensión 15 días&lt;/option&gt;&lt;option value=&quot;30&quot;&gt;Suspensión 30 días&lt;/option&gt;&lt;option value=&quot;0&quot;&gt;Retiro del sindicato&lt;/option&gt;&lt;/select&gt;&lt;/label&gt;&lt;br&gt;&lt;input id=&quot;rTxt&quot; placeholder=&quot;Decisión en pocas palabras, ej. Falta grave según acta&quot; style=&quot;width:100%;margin-top:6px&quot;&gt;`
+:`&lt;input id=&quot;rTxt&quot; placeholder=&quot;Ej. Aseo de la terminal, cada móvil una vez&quot; style=&quot;width:100%&quot;&gt;&lt;label style=&quot;display:block;margin-top:6px&quot;&gt;Plazo &lt;input id=&quot;rPl&quot; type=&quot;date&quot;&gt;&lt;/label&gt;&lt;p class=&quot;muted&quot;&gt;Quien no cumpla hasta el plazo queda suspendido automáticamente.&lt;/p&gt;`}
+function nuevaRes(){const t=document.getElementById(&#x27;rTipo&#x27;).value,txt=document.getElementById(&#x27;rTxt&#x27;).value.trim();if(!txt){toast(&#x27;Escribe la decisión&#x27;);return}
+const f=new Date().toLocaleDateString(&#x27;es-BO&#x27;,{day:&#x27;2-digit&#x27;,month:&#x27;2-digit&#x27;});
+if(t==&#x27;sancion&#x27;){const m=+document.getElementById(&#x27;rM&#x27;).value,d=+document.getElementById(&#x27;rS&#x27;).value;const c=st.choferes.find(x=&gt;x.m==m);c.susp=d?`Suspendido ${d} días`:&#x27;Retirado&#x27;;
+st.res.push({id:Date.now(),f,tipo:&#x27;sancion&#x27;,m,dias:d,txt});reg(`⚖️ Resolución: móvil ${m} ${c.susp.toLowerCase()} — ${txt}`)}
+else{const pl=document.getElementById(&#x27;rPl&#x27;).value;st.res.push({id:Date.now(),f,tipo:&#x27;obligacion&#x27;,txt,plazo:pl?pl.split(&#x27;-&#x27;).reverse().slice(0,2).join(&#x27;/&#x27;):&#x27;sin fecha&#x27;,cumplio:[],venc:false});reg(`⚖️ Resolución para todos: ${txt}`)}
+toast(&#x27;Resolución registrada: la app la hace cumplir&#x27;);draw()}
+function cumplio(id,m){const r=st.res.find(x=&gt;x.id==id);r.cumplio.push(m);reg(`Móvil ${m} cumplió: ${r.txt}`);draw()}
+function vencer(id){const r=st.res.find(x=&gt;x.id==id);r.venc=true;st.choferes.filter(c=&gt;!r.cumplio.includes(c.m)).forEach(c=&gt;{c.susp=&#x27;Suspendido por no cumplir resolución&#x27;;reg(`⚖️ Móvil ${c.m} suspendido automáticamente: no cumplió &quot;${r.txt}&quot;`)});toast(&#x27;Plazo vencido: los que no cumplieron quedaron suspendidos&#x27;);draw()}
+function revisarRecl(m){const n=st.recl.filter(r=&gt;r.m==m&amp;&amp;r.e==&#x27;resuelto&#x27;&amp;&amp;r.r&amp;&amp;!r.r.startsWith(&#x27;Reclamo sin fundamento&#x27;)).length;const c=st.choferes.find(x=&gt;x.m==m);
+if(c&amp;&amp;n&gt;=st.limRecl&amp;&amp;!c.susp){c.susp=&#x27;Suspendido 7 días por reclamos&#x27;;reg(`⚖️ Móvil ${m} suspendido automáticamente: ${n} reclamos con fundamento`);toast(`Móvil ${m} suspendido por ${n} reclamos`)}}
+function resolver(i,t){const r=st.recl[i];const obs=prompt(&#x27;Detalle de la respuesta (opcional)&#x27;,&#x27;&#x27;)||&#x27;&#x27;;r.e=&#x27;resuelto&#x27;;r.r=t+(obs?&#x27;: &#x27;+obs:&#x27;&#x27;);reg(`Reclamo ${r.id} del móvil ${r.m}: ${r.r}`);if(r.app&amp;&amp;window.T21)T21.push(&#x27;resp&#x27;,{id:r.id,r:r.r});revisarRecl(r.m);toast(&#x27;Reclamo resuelto. Se avisa al pasajero.&#x27;);draw()}
+function justif(i,ok){const x=st.emer[i];x.e=ok?&#x27;ok&#x27;:&#x27;falta&#x27;;reg(`Retiro por emergencia del móvil ${x.m} (${x.mot}): ${ok?&#x27;justificado, sin falta&#x27;:&#x27;no justificado, cuenta como falta&#x27;}`);draw()}
+function desbloq(i){const c=st.clientes[i];c.b=false;c.f=0;reg(`Bloqueo quitado al cliente ${c.n}`);draw()}
+function aprobar(i,ok){const p=st.pend.splice(i,1)[0];reg(`${p.t} ${p.n}: ${ok?&#x27;aprobado&#x27;:&#x27;rechazado&#x27;}`);toast(ok?&#x27;Aprobado&#x27;:&#x27;Rechazado&#x27;);draw()}
+draw();
+&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;" style="display:none"></iframe>
+<script>
+const N={cliente:'Cliente',chofer:'Chofer',oficina:'Oficina',directiva:'Directiva'};
+function ver(k){document.getElementById('ini').style.display='none';document.getElementById('bar').style.display='flex';document.getElementById('tit').textContent=N[k];
+document.querySelectorAll('iframe').forEach(f=>f.style.display=f.id=='f_'+k?'block':'none');const w=document.getElementById('f_'+k).contentWindow;if(w&&w.t21Sync)w.t21Sync()}
+function inicio(){document.querySelectorAll('iframe').forEach(f=>f.style.display='none');document.getElementById('bar').style.display='none';document.getElementById('ini').style.display='block'}
+</script></body></html>
