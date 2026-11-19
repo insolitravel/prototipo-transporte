@@ -171,6 +171,7 @@ nav button[aria-current=page]{background:var(--ink);color:var(--bg)}
 &lt;nav&gt;
   &lt;button id=&quot;nv-viajar&quot; aria-current=&quot;page&quot;&gt;Quiero viajar&lt;/button&gt;
   &lt;button id=&quot;nv-enc&quot;&gt;Enviar encomienda&lt;/button&gt;
+  &lt;button id=&quot;nv-ruta&quot;&gt;Recojo y privado&lt;/button&gt;
   &lt;button id=&quot;nv-res&quot;&gt;Mis reservas&lt;/button&gt;
 &lt;/nav&gt;
 
@@ -198,12 +199,12 @@ let term=&#x27;tor&#x27;, vista=&#x27;viajar&#x27;, bk=null, rating=null;
 let reservas=[{id:&#x27;r0&#x27;,vid:&#x27;v7&#x27;,de:&#x27;Cochabamba&#x27;,a:&#x27;Torotoro&#x27;,asientos:[{n:5,nom:&#x27;Jos&#x27;}],recojo:&#x27;Oficina&#x27;,equip:&#x27;Liviano&#x27;,hecho:true,calificado:false,fecha:&#x27;Ayer&#x27;}];
 
 const PASAJE=45, TAR={Liviano:0,Mediano:10,Pesado:20}; // precios de ejemplo
-const RUTA={tor:{sube:[&#x27;Torotoro&#x27;,&#x27;Río Caine&#x27;],baja:[&#x27;Cochabamba&#x27;,&#x27;Tarata&#x27;,&#x27;Cliza&#x27;,&#x27;Anzaldo&#x27;]},cba:{sube:[&#x27;Cochabamba&#x27;],baja:[&#x27;Torotoro&#x27;,&#x27;Río Caine&#x27;]}};
-const precio=()=&gt;!bk?PASAJE:term===&#x27;tor&#x27;?(bk.sube===&#x27;Río Caine&#x27;?40:45):(bk.baja===&#x27;Río Caine&#x27;?40:45);
+const RUTA={tor:{sube:[&#x27;Torotoro&#x27;,&#x27;Río Caine&#x27;],baja:[&#x27;Cochabamba&#x27;,&#x27;Tarata&#x27;,&#x27;Cliza&#x27;,&#x27;Anzaldo&#x27;]},cba:{sube:[&#x27;Cochabamba&#x27;],baja:[&#x27;Torotoro&#x27;,&#x27;Hacienda Loma&#x27;,&#x27;Sucusuma&#x27;,&#x27;Rancho Pampa&#x27;,&#x27;Calauta&#x27;,&#x27;Chilcoma&#x27;,&#x27;Julo Grande&#x27;,&#x27;La Huerta&#x27;,&#x27;Taquimbala&#x27;,&#x27;Quirusmayo&#x27;,&#x27;Tayapaya&#x27;,&#x27;Caranota&#x27;,&#x27;Alfamayo&#x27;]}};
+const precio=()=&gt;!bk?PASAJE:term===&#x27;tor&#x27;?(bk.sube===&#x27;Río Caine&#x27;?40:45):([&#x27;Torotoro&#x27;,&#x27;Hacienda Loma&#x27;].includes(bk.baja)?45:40);
 const totalBk=()=&gt;bk?bk.sel.length*precio()+TAR[bk.equip]:0;
 function pintarTramo(){const R=RUTA[term];if(!bk.sube)bk.sube=R.sube[0];if(!bk.baja)bk.baja=R.baja[0];
  const sel=(id,arr,k)=&gt;`&lt;select id=&quot;${id}&quot; style=&quot;width:100%;padding:12px;border-radius:10px;font:inherit&quot; onchange=&quot;bk.${k}=this.value;chk()&quot;&gt;${arr.map(x=&gt;`&lt;option ${bk[k]===x?&#x27;selected&#x27;:&#x27;&#x27;}&gt;${x}&lt;/option&gt;`).join(&#x27;&#x27;)}&lt;/select&gt;`;
- $(&#x27;#tramo&#x27;).innerHTML=`&lt;div class=&quot;field&quot; style=&quot;display:grid;grid-template-columns:1fr 1fr;gap:8px&quot;&gt;&lt;div&gt;&lt;span class=&quot;lb&quot;&gt;Subo en&lt;/span&gt;${R.sube.length&gt;1?sel(&#x27;tSube&#x27;,R.sube,&#x27;sube&#x27;):&#x27;&lt;b&gt;&#x27;+R.sube[0]+&#x27;&lt;/b&gt;&#x27;}&lt;/div&gt;&lt;div&gt;&lt;span class=&quot;lb&quot;&gt;Bajo en&lt;/span&gt;${sel(&#x27;tBaja&#x27;,R.baja,&#x27;baja&#x27;)}&lt;/div&gt;&lt;/div&gt;&lt;p class=&quot;hint&quot;&gt;${term===&#x27;tor&#x27;?&#x27;Desde Torotoro 45 Bs; desde Río Caine 40 Bs, bajes donde bajes.&#x27;:&#x27;Hasta Torotoro 45 Bs; hasta Río Caine 40 Bs.&#x27;}&lt;/p&gt;`;}
+ $(&#x27;#tramo&#x27;).innerHTML=`&lt;div class=&quot;field&quot; style=&quot;display:grid;grid-template-columns:1fr 1fr;gap:8px&quot;&gt;&lt;div&gt;&lt;span class=&quot;lb&quot;&gt;Subo en&lt;/span&gt;${R.sube.length&gt;1?sel(&#x27;tSube&#x27;,R.sube,&#x27;sube&#x27;):&#x27;&lt;b&gt;&#x27;+R.sube[0]+&#x27;&lt;/b&gt;&#x27;}&lt;/div&gt;&lt;div&gt;&lt;span class=&quot;lb&quot;&gt;Bajo en&lt;/span&gt;${sel(&#x27;tBaja&#x27;,R.baja,&#x27;baja&#x27;)}&lt;/div&gt;&lt;/div&gt;&lt;p class=&quot;hint&quot;&gt;${term===&#x27;tor&#x27;?&#x27;Desde Torotoro 45 Bs; desde Río Caine 40 Bs, bajes donde bajes.&#x27;:&#x27;Hasta Torotoro o Hacienda Loma: 45 bolivianos. Hasta Alfamayo y todo Río Caine, hasta Sucusuma: 40 bolivianos.&#x27;}&lt;/p&gt;`;}
 const $=s=&gt;document.querySelector(s);
 const esc=s=&gt;String(s).replace(/[&amp;&lt;&gt;&quot;&#x27;]/g,c=&gt;({&#x27;&amp;&#x27;:&#x27;&amp;amp;&#x27;,&#x27;&lt;&#x27;:&#x27;&amp;lt;&#x27;,&#x27;&gt;&#x27;:&#x27;&amp;gt;&#x27;,&#x27;&quot;&#x27;:&#x27;&amp;quot;&#x27;,&quot;&#x27;&quot;:&#x27;&amp;#39;&#x27;}[c]));
 const cap=v=&gt;v.front+v.rows.reduce((a,b)=&gt;a+b,0);
@@ -219,7 +220,8 @@ function render(){
   $(&#x27;#nv-res&#x27;).toggleAttribute(&#x27;aria-current&#x27;,vista===&#x27;res&#x27;); if(vista===&#x27;res&#x27;)$(&#x27;#nv-res&#x27;).setAttribute(&#x27;aria-current&#x27;,&#x27;page&#x27;);
   $(&#x27;#nv-enc&#x27;).toggleAttribute(&#x27;aria-current&#x27;,vista===&#x27;enc&#x27;); if(vista===&#x27;enc&#x27;)$(&#x27;#nv-enc&#x27;).setAttribute(&#x27;aria-current&#x27;,&#x27;page&#x27;);
   $(&#x27;.term&#x27;).style.display=vista===&#x27;viajar&#x27;?&#x27;&#x27;:&#x27;none&#x27;;
-  $(&#x27;#main&#x27;).innerHTML = vista===&#x27;viajar&#x27;?viajarHTML():vista===&#x27;enc&#x27;?encHTML():reservasHTML();
+  $(&#x27;#nv-ruta&#x27;).toggleAttribute(&#x27;aria-current&#x27;,vista===&#x27;ruta&#x27;); if(vista===&#x27;ruta&#x27;)$(&#x27;#nv-ruta&#x27;).setAttribute(&#x27;aria-current&#x27;,&#x27;page&#x27;);
+  $(&#x27;#main&#x27;).innerHTML = vista===&#x27;ruta&#x27;?privHTML()+rutaHTML():vista===&#x27;viajar&#x27;?viajarHTML():vista===&#x27;enc&#x27;?encHTML():reservasHTML();
   if(vista===&#x27;enc&#x27;)encCheck();
 }
 
@@ -326,10 +328,10 @@ function abrir(vid,etiqueta){
     &lt;div class=&quot;field&quot;&gt;&lt;span class=&quot;lb&quot;&gt;Equipaje&lt;/span&gt;&lt;div class=&quot;seg&quot; id=&quot;segEq&quot;&gt;
       &lt;button aria-pressed=&quot;true&quot; data-v=&quot;Liviano&quot;&gt;Liviano&lt;small&gt;Mochila · gratis&lt;/small&gt;&lt;/button&gt;
       &lt;button aria-pressed=&quot;false&quot; data-v=&quot;Mediano&quot;&gt;Mediano&lt;small&gt;Bulto · ${TAR.Mediano} Bs&lt;/small&gt;&lt;/button&gt;
-      &lt;button aria-pressed=&quot;false&quot; data-v=&quot;Pesado&quot;&gt;Pesado&lt;small&gt;Quintal · ${TAR.Pesado} Bs&lt;/small&gt;&lt;/button&gt;&lt;/div&gt;&lt;p class=&quot;hint&quot;&gt;Precios fijos del sindicato, por bulto.&lt;/p&gt;&lt;/div&gt;
+      &lt;button aria-pressed=&quot;false&quot; data-v=&quot;Pesado&quot;&gt;Pesado&lt;small&gt;Quintal · ${TAR.Pesado} Bs&lt;/small&gt;&lt;/button&gt;&lt;/div&gt;&lt;input id=&quot;eqd&quot; placeholder=&quot;¿Qué llevas? Ej. 2 maletas, abarrotes, fruta&quot; oninput=&quot;bk.eqd=this.value&quot; style=&quot;width:100%;padding:10px;margin-top:8px&quot;&gt;&lt;p class=&quot;hint&quot;&gt;Precios fijos del sindicato, por bulto. Avisa qué llevas para que el móvil no cargue encomiendas pesadas de más.&lt;/p&gt;&lt;/div&gt;
     &lt;div class=&quot;field&quot;&gt;&lt;span class=&quot;lb&quot;&gt;¿Dónde te recogemos?&lt;/span&gt;&lt;div class=&quot;seg&quot; id=&quot;segRec&quot;&gt;
       &lt;button aria-pressed=&quot;true&quot; data-v=&quot;Oficina&quot;&gt;Voy a la oficina&lt;small&gt;Terminal de ${T[term].de}&lt;/small&gt;&lt;/button&gt;
-      &lt;button aria-pressed=&quot;false&quot; data-v=&quot;Casa&quot;&gt;Recójanme&lt;small&gt;Envío mi ubicación&lt;/small&gt;&lt;/button&gt;&lt;/div&gt;
+      ${term===&#x27;cba&#x27;?&#x27;&lt;/div&gt;&lt;p class=&quot;hint&quot;&gt;En Cochabamba los viajes compartidos no recogen en casa ni en hotel: llega a la oficina. Para que te recojan, pide un viaje privado.&lt;/p&gt;&#x27;:&#x27;&lt;button aria-pressed=&quot;false&quot; data-v=&quot;Casa&quot;&gt;Recójanme&lt;small&gt;Envío mi ubicación&lt;/small&gt;&lt;/button&gt;&lt;/div&gt;&#x27;}
       &lt;div id=&quot;ubic&quot;&gt;&lt;/div&gt;&lt;/div&gt;
     &lt;div class=&quot;field&quot;&gt;&lt;label for=&quot;cel&quot;&gt;Tu celular&lt;/label&gt;&lt;input id=&quot;cel&quot; inputmode=&quot;numeric&quot; maxlength=&quot;8&quot; placeholder=&quot;Ej. 71234567&quot; oninput=&quot;bk.cel=this.value.replace(/\\D/g,&#x27;&#x27;);this.value=bk.cel;chk()&quot;&gt;
       &lt;p class=&quot;hint&quot;&gt;Te avisamos aquí cuando tu móvil esté por llenarse.&lt;/p&gt;&lt;/div&gt;
@@ -373,12 +375,12 @@ function cerrar(){$(&#x27;#sheetBg&#x27;).classList.remove(&#x27;open&#x27;);bk=
 function pubPas(vid,asientos,eq,rec,sube,baja){if(window.T21&amp;&amp;V[vid]&amp;&amp;V[vid].movil==12)asientos.forEach(a=&gt;T21.push(&#x27;pas12&#x27;,{a:a.n,n:a.nom,eq,r:rec,st:&#x27;apartado&#x27;,sube,baja,app:1}))}
 function confirmar(){
   if(bk.pa){reservas.unshift({id:&#x27;r&#x27;+Date.now(),vid:null,fija:bk.fija,term:term,de:T[term].de,a:T[term].a,
-      asientos:bk.sel.map(k=&gt;({n:null,nom:bk.nombres[k].trim()})),recojo:bk.recojo===&#x27;Casa&#x27;?&#x27;en tu ubicación&#x27;:&#x27;en la oficina&#x27;,equip:bk.equip,sube:bk.sube,baja:bk.baja,total:totalBk(),hecho:false});
+      asientos:bk.sel.map(k=&gt;({n:null,nom:bk.nombres[k].trim()})),recojo:bk.recojo===&#x27;Casa&#x27;?&#x27;en tu ubicación&#x27;:&#x27;en la oficina&#x27;,equip:bk.equip+(bk.eqd?&#x27; (&#x27;+bk.eqd+&#x27;)&#x27;:&#x27;&#x27;),sube:bk.sube,baja:bk.baja,total:totalBk(),hecho:false});
     const h=bk.fija;cerrar();render();toast(`Reserva confirmada para las ${h}. Te avisamos qué móvil te toca.`);return;}
   const v=V[bk.vid];v.occ.push(...bk.sel);
   reservas.unshift({id:&#x27;r&#x27;+Date.now(),vid:bk.vid,de:T[term].de,a:T[term].a,asientos:bk.sel.map(k=&gt;({n:k,nom:bk.nombres[k].trim()})),
-    recojo:bk.recojo===&#x27;Casa&#x27;?&#x27;en tu ubicación&#x27;:&#x27;en la oficina&#x27;,equip:bk.equip,sube:bk.sube,baja:bk.baja,total:totalBk(),hecho:false});
-  pubPas(bk.vid,bk.sel.map(k=&gt;({n:k,nom:bk.nombres[k].trim()})),bk.equip,bk.recojo===&#x27;Casa&#x27;?&#x27;Casa&#x27;:&#x27;Oficina&#x27;,bk.sube,bk.baja);
+    recojo:bk.recojo===&#x27;Casa&#x27;?&#x27;en tu ubicación&#x27;:&#x27;en la oficina&#x27;,equip:bk.equip+(bk.eqd?&#x27; (&#x27;+bk.eqd+&#x27;)&#x27;:&#x27;&#x27;),sube:bk.sube,baja:bk.baja,total:totalBk(),hecho:false});
+  pubPas(bk.vid,bk.sel.map(k=&gt;({n:k,nom:bk.nombres[k].trim()})),bk.equip+(bk.eqd?&#x27; (&#x27;+bk.eqd+&#x27;)&#x27;:&#x27;&#x27;),bk.recojo===&#x27;Casa&#x27;?&#x27;Casa&#x27;:&#x27;Oficina&#x27;,bk.sube,bk.baja);
   const m=v.movil;cerrar();render();
   const t=T[term];
   if(t.fila[0]&amp;&amp;V[t.fila[0]]===v&amp;&amp;libres(v)&lt;=0){
@@ -429,10 +431,10 @@ function abrirPA(i){
     &lt;div class=&quot;field&quot;&gt;&lt;span class=&quot;lb&quot;&gt;Equipaje&lt;/span&gt;&lt;div class=&quot;seg&quot; id=&quot;segEq&quot;&gt;
       &lt;button aria-pressed=&quot;true&quot; data-v=&quot;Liviano&quot;&gt;Liviano&lt;small&gt;Mochila · gratis&lt;/small&gt;&lt;/button&gt;
       &lt;button aria-pressed=&quot;false&quot; data-v=&quot;Mediano&quot;&gt;Mediano&lt;small&gt;Bulto · ${TAR.Mediano} Bs&lt;/small&gt;&lt;/button&gt;
-      &lt;button aria-pressed=&quot;false&quot; data-v=&quot;Pesado&quot;&gt;Pesado&lt;small&gt;Quintal · ${TAR.Pesado} Bs&lt;/small&gt;&lt;/button&gt;&lt;/div&gt;&lt;p class=&quot;hint&quot;&gt;Precios fijos del sindicato, por bulto.&lt;/p&gt;&lt;/div&gt;
+      &lt;button aria-pressed=&quot;false&quot; data-v=&quot;Pesado&quot;&gt;Pesado&lt;small&gt;Quintal · ${TAR.Pesado} Bs&lt;/small&gt;&lt;/button&gt;&lt;/div&gt;&lt;input id=&quot;eqd&quot; placeholder=&quot;¿Qué llevas? Ej. 2 maletas, abarrotes, fruta&quot; oninput=&quot;bk.eqd=this.value&quot; style=&quot;width:100%;padding:10px;margin-top:8px&quot;&gt;&lt;p class=&quot;hint&quot;&gt;Precios fijos del sindicato, por bulto. Avisa qué llevas para que el móvil no cargue encomiendas pesadas de más.&lt;/p&gt;&lt;/div&gt;
     &lt;div class=&quot;field&quot;&gt;&lt;span class=&quot;lb&quot;&gt;¿Dónde te recogemos?&lt;/span&gt;&lt;div class=&quot;seg&quot; id=&quot;segRec&quot;&gt;
       &lt;button aria-pressed=&quot;true&quot; data-v=&quot;Oficina&quot;&gt;Voy a la oficina&lt;small&gt;Terminal de ${T[term].de}&lt;/small&gt;&lt;/button&gt;
-      &lt;button aria-pressed=&quot;false&quot; data-v=&quot;Casa&quot;&gt;Recójanme&lt;small&gt;Envío mi ubicación&lt;/small&gt;&lt;/button&gt;&lt;/div&gt;
+      ${term===&#x27;cba&#x27;?&#x27;&lt;/div&gt;&lt;p class=&quot;hint&quot;&gt;En Cochabamba los viajes compartidos no recogen en casa ni en hotel: llega a la oficina. Para que te recojan, pide un viaje privado.&lt;/p&gt;&#x27;:&#x27;&lt;button aria-pressed=&quot;false&quot; data-v=&quot;Casa&quot;&gt;Recójanme&lt;small&gt;Envío mi ubicación&lt;/small&gt;&lt;/button&gt;&lt;/div&gt;&#x27;}
       &lt;div id=&quot;ubic&quot;&gt;&lt;/div&gt;&lt;/div&gt;
     &lt;div class=&quot;field&quot;&gt;&lt;label for=&quot;cel&quot;&gt;Tu celular&lt;/label&gt;&lt;input id=&quot;cel&quot; inputmode=&quot;numeric&quot; maxlength=&quot;8&quot; placeholder=&quot;Ej. 71234567&quot; oninput=&quot;bk.cel=this.value.replace(/\\D/g,&#x27;&#x27;);this.value=bk.cel;chk()&quot;&gt;&lt;/div&gt;
     &lt;div id=&quot;total&quot; style=&quot;font-weight:800;font-size:17px;margin-top:14px;text-align:center&quot;&gt;&lt;/div&gt;
@@ -512,6 +514,68 @@ function encAvanzar(id){const e=encs.find(x=&gt;x.id===id);if(e.est&lt;3)e.est++
 function encListHTML(){if(!encs.length)return &#x27;&#x27;;return &#x27;&lt;h2&gt;Mis encomiendas&lt;/h2&gt;&#x27;+encs.map(e=&gt;`&lt;article class=&quot;res&quot;&gt;&lt;div class=&quot;res-top&quot;&gt;&lt;b&gt;${e.cod} · ${esc(e.tipos.join(&#x27;, &#x27;))}${e.fragil?&#x27; · Frágil&#x27;:&#x27;&#x27;}&lt;/b&gt;&lt;span class=&quot;meta&quot;&gt;a ${esc(e.parada)}&lt;/span&gt;&lt;/div&gt;
  &lt;div class=&quot;estado ${e.est==3?&#x27;&#x27;:&#x27;av&#x27;}&quot;&gt;${EST[e.est]}&lt;/div&gt;&lt;div class=&quot;meta&quot;&gt;${e.desc?esc(e.desc)+&#x27;. &#x27;:&#x27;&#x27;}Recoge: ${esc(e.rec)} (${e.recC}).&lt;/div&gt;${e.plz?`&lt;div class=&quot;meta&quot;&gt;${e.plz==4?&#x27;🔴 ⚡ Entrega rápida: va en el primer móvil, entregar en 4 h&#x27;:e.plz==24?&#x27;🟡 Normal: hasta 24 h&#x27;:&#x27;🟢 Aguanta: hasta 3 días&#x27;} · Valor declarado: ${e.val} Bs · el chofer no lo ve&lt;br&gt;🔑 Código de entrega para ${esc(e.rec)}: &lt;b&gt;${e.pin}&lt;/b&gt; (le llega por SMS; el chofer lo pide al entregar)&lt;/div&gt;`:&#x27;&#x27;}${e.inc?`&lt;div class=&quot;estado&quot; style=&quot;color:#b3261e&quot;&gt;⚠️ ${esc(e.inc)}&lt;/div&gt;`:&#x27;&#x27;}
  &lt;div class=&quot;act&quot;&gt;${e.est&lt;3?`&lt;button class=&quot;btn&quot; onclick=&quot;encAvanzar(&#x27;${e.id}&#x27;)&quot;&gt;Demo: siguiente estado&lt;/button&gt;`:&#x27;&#x27;}${!e.inc?`&lt;select id=&quot;pb${e.id}&quot; style=&quot;padding:8px&quot;&gt;&lt;option&gt;Se perdió&lt;/option&gt;&lt;option&gt;Llegó dañada&lt;/option&gt;&lt;option&gt;Llegó tarde y se malogró&lt;/option&gt;&lt;option&gt;La entregaron a otra persona&lt;/option&gt;&lt;/select&gt; &lt;button class=&quot;btn&quot; onclick=&quot;encProblema(&#x27;${e.id}&#x27;)&quot;&gt;Reportar problema&lt;/button&gt;`:&#x27;&#x27;}&lt;/div&gt;&lt;/article&gt;`).join(&#x27;&#x27;);}
+
+
+let pf={de:&#x27;Cochabamba&#x27;,a:&#x27;Torotoro&#x27;,f:&#x27;&#x27;,h:&#x27;07:00&#x27;,n:2,rec:&#x27;Oficina&#x27;,ref:&#x27;&#x27;};
+function privs(){return window.T21?T21.get(&#x27;privados&#x27;,[]):(window._pv||[])}
+function setPrivs(a){if(window.T21)T21.set(&#x27;privados&#x27;,a);else window._pv=a}
+function privHTML(){const mis=privs();
+ return `&lt;h2&gt;Viaje privado&lt;/h2&gt;&lt;article class=&quot;res&quot;&gt;&lt;div class=&quot;meta&quot;&gt;Todo el móvil para ti o tu grupo. En Cochabamba, solo el privado recoge en hotel o casa.&lt;/div&gt;
+ &lt;div class=&quot;act&quot;&gt;&lt;select onchange=&quot;pf.de=this.value;pf.a=this.value==&#x27;Torotoro&#x27;?&#x27;Cochabamba&#x27;:&#x27;Torotoro&#x27;;render()&quot; style=&quot;padding:8px&quot;&gt;${[&#x27;Cochabamba&#x27;,&#x27;Torotoro&#x27;].map(x=&gt;`&lt;option ${x==pf.de?&#x27;selected&#x27;:&#x27;&#x27;}&gt;${x}&lt;/option&gt;`).join(&#x27;&#x27;)}&lt;/select&gt; → &lt;input value=&quot;${esc(pf.a)}&quot; oninput=&quot;pf.a=this.value&quot; style=&quot;padding:8px;width:45%&quot;&gt;&lt;/div&gt;
+ &lt;div class=&quot;act&quot;&gt;&lt;input type=&quot;date&quot; value=&quot;${pf.f}&quot; onchange=&quot;pf.f=this.value&quot; style=&quot;padding:8px&quot;&gt; &lt;input type=&quot;time&quot; value=&quot;${pf.h}&quot; onchange=&quot;pf.h=this.value&quot; style=&quot;padding:8px&quot;&gt; &lt;span class=&quot;meta&quot;&gt;Personas: &lt;b&gt;${pf.n}&lt;/b&gt;&lt;/span&gt; &lt;button class=&quot;btn&quot; onclick=&quot;pf.n=Math.max(1,pf.n-1);render()&quot;&gt;−&lt;/button&gt;&lt;button class=&quot;btn&quot; onclick=&quot;pf.n=Math.min(14,pf.n+1);render()&quot;&gt;+&lt;/button&gt;&lt;/div&gt;
+ &lt;div class=&quot;act&quot;&gt;${[&#x27;Oficina&#x27;,&#x27;Hotel&#x27;,&#x27;Casa&#x27;].map(x=&gt;`&lt;button class=&quot;btn&quot; ${pf.rec==x?&#x27;style=&quot;outline:3px solid var(--gold)&quot;&#x27;:&#x27;&#x27;} onclick=&quot;pf.rec=&#x27;${x}&#x27;;render()&quot;&gt;${x==&#x27;Oficina&#x27;?&#x27;Salgo de la oficina&#x27;:&#x27;Recójanme en &#x27;+x.toLowerCase()}&lt;/button&gt;`).join(&#x27;&#x27;)}&lt;/div&gt;
+ ${pf.rec!=&#x27;Oficina&#x27;?`&lt;input placeholder=&quot;Dirección o nombre del hotel&quot; value=&quot;${esc(pf.ref)}&quot; oninput=&quot;pf.ref=this.value&quot; style=&quot;width:100%;padding:10px&quot;&gt;`:&#x27;&#x27;}
+ &lt;div class=&quot;act&quot;&gt;&lt;button class=&quot;btn&quot; style=&quot;background:var(--red);color:#fff&quot; onclick=&quot;pedirPriv()&quot;&gt;Pedir viaje privado&lt;/button&gt;&lt;/div&gt;&lt;/article&gt;
+ ${mis.map(x=&gt;`&lt;article class=&quot;res&quot;&gt;&lt;div class=&quot;res-top&quot;&gt;&lt;b&gt;${esc(x.de)} → ${esc(x.a)}&lt;/b&gt;&lt;span class=&quot;meta&quot;&gt;${x.f||&#x27;fecha a definir&#x27;} · ${x.h} · ${x.n} pers.&lt;/span&gt;&lt;/div&gt;
+  &lt;div class=&quot;estado&quot;&gt;${x.st==&#x27;buscando&#x27;?&#x27;⏳ Buscando chofer: se ofreció al móvil &#x27;+x.movs[x.i]+&#x27; (primero libre de la lista)&#x27;:x.st==&#x27;precio&#x27;?&#x27;Móvil &#x27;+x.movs[x.i]+&#x27; acepta por &lt;b&gt;&#x27;+x.precio+&#x27; Bs&lt;/b&gt;. Adelanto: &#x27;+Math.round(x.precio*0.3)+&#x27; Bs al QR del chofer&#x27;:x.st==&#x27;ok&#x27;?&#x27;✅ Confirmado con el móvil &#x27;+x.movs[x.i]+&#x27;. Adelanto pagado.&#x27;:&#x27;❌ Ningún chofer disponible&#x27;}&lt;/div&gt;
+  ${x.st==&#x27;precio&#x27;?`&lt;div class=&quot;act&quot;&gt;&lt;button class=&quot;btn&quot; onclick=&quot;pagarPriv(&#x27;${x.id}&#x27;)&quot;&gt;Pagar adelanto con QR&lt;/button&gt;&lt;/div&gt;`:&#x27;&#x27;}&lt;/article&gt;`).join(&#x27;&#x27;)}`}
+function pedirPriv(){const a=privs();a.unshift({id:&#x27;p&#x27;+Date.now(),...pf,movs:[12,21,3],i:0,st:&#x27;buscando&#x27;});setPrivs(a);render();toast(&#x27;Solicitud enviada al primer chofer libre de la lista&#x27;)}
+function pagarPriv(id){const a=privs();a.find(x=&gt;x.id==id).st=&#x27;ok&#x27;;setPrivs(a);render();toast(&#x27;Viaje privado confirmado&#x27;)}
+
+/* ===== Recojo en el camino (Torotoro → Cochabamba) ===== */
+const RUTAK=[[&#x27;Torotoro (pueblo)&#x27;,3],[&#x27;Hacienda Loma&#x27;,10],[&#x27;Sucusuma&#x27;,20],[&#x27;Rancho Pampa&#x27;,25],[&#x27;Calauta – puente&#x27;,30],[&#x27;Calauta – comunidad&#x27;,30],[&#x27;Calauta – campamento de Caminos&#x27;,31],[&#x27;Chilcoma&#x27;,34],[&#x27;Cruce Julo Grande&#x27;,37],[&#x27;Julo Grande (desvío)&#x27;,37,1],[&#x27;Julo Chico (desvío)&#x27;,37,1],[&#x27;Tago Tago (desvío)&#x27;,37,1],[&#x27;La Huerta&#x27;,38],[&#x27;Taquimbala&#x27;,40],[&#x27;Quirusmayo&#x27;,42],[&#x27;Tayapaya&#x27;,48],[&#x27;Caranota&#x27;,50]];
+const DESVIO=40, CARGA={mochila:0,carga:5,mucha:10};
+let rf={com:&#x27;La Huerta&#x27;,ref:&#x27;&#x27;,eq:&#x27;mochila&#x27;,n:1,pago:false,gps:null};
+function recs(){return window.T21?T21.get(&#x27;recojos&#x27;,[]):(window._rc||[])}
+function setRecs(a){if(window.T21)T21.set(&#x27;recojos&#x27;,a);else window._rc=a}
+function salida(){return window.T21?T21.get(&#x27;salida12&#x27;,null):window._sal}
+function idx(c){return RUTAK.findIndex(r=&gt;r[0]===c)}
+function eta(com){const i=idx(com);let m=RUTAK[i][1];const prev=recs().filter(r=&gt;r.st!==&#x27;noshow&#x27;&amp;&amp;idx(r.com)&lt;i);
+  if(prev.some(r=&gt;RUTAK[idx(r.com)][2])||RUTAK[i][2])m+=DESVIO;m+=prev.reduce((a,r)=&gt;a+CARGA[r.eq],0);return m}
+function rutaHTML(){const sal=salida();const pas=sal?Math.floor((Date.now()-sal.t)/60000)+(sal.extra||0):0;
+  const libres=14-10-recs().filter(r=&gt;r.st!==&#x27;noshow&#x27;).reduce((a,r)=&gt;a+r.n,0);
+  const opts=RUTAK.map(r=&gt;`&lt;option ${r[0]===rf.com?&#x27;selected&#x27;:&#x27;&#x27;}&gt;${r[0]}&lt;/option&gt;`).join(&#x27;&#x27;);
+  const ya=sal&amp;&amp;eta(rf.com)&lt;=pas;
+  const mios=recs().filter(r=&gt;r.mio);
+  return `&lt;h2&gt;Recojo en el camino&lt;/h2&gt;
+  &lt;article class=&quot;res&quot;&gt;&lt;div class=&quot;res-top&quot;&gt;&lt;b&gt;🚐 Móvil 12 · Torotoro → Cochabamba&lt;/b&gt;&lt;span class=&quot;meta&quot;&gt;${sal?&#x27;En camino hace &#x27;+pas+&#x27; min&#x27;:&#x27;En el carril&#x27;}&lt;/span&gt;&lt;/div&gt;
+  &lt;div class=&quot;meta&quot;&gt;${libres&gt;0?libres+&#x27; asientos libres&#x27;:&#x27;Completo&#x27;} · ${ya?&#x27;⚠️ Ya pasó por &#x27;+esc(rf.com)+&#x27;: espera el siguiente móvil&#x27;:&#x27;Llega a &#x27;+esc(rf.com)+&#x27; a los &#x27;+eta(rf.com)+&#x27; min de salir del carril&#x27;+(sal?&#x27; (faltan unos &#x27;+Math.max(0,eta(rf.com)-pas)+&#x27; min)&#x27;:&#x27;&#x27;)}&lt;/div&gt;
+  &lt;div class=&quot;act&quot;&gt;&lt;button class=&quot;btn&quot; onclick=&quot;demoSalida()&quot;&gt;${sal?&#x27;Demo: adelantar 10 min&#x27;:&#x27;Demo: el móvil sale del carril&#x27;}&lt;/button&gt;&lt;/div&gt;&lt;/article&gt;
+  &lt;h2&gt;Reservar mi recojo&lt;/h2&gt;
+  &lt;label class=&quot;meta&quot;&gt;¿Dónde vas a esperar? (aunque ahora estés en otro lado)&lt;/label&gt;
+  &lt;select id=&quot;rcom&quot; style=&quot;width:100%;padding:10px&quot; onchange=&quot;rf.com=this.value;render()&quot;&gt;${opts}&lt;/select&gt;
+  &lt;input id=&quot;rref&quot; placeholder=&quot;Referencia: casa azul frente a la escuela&quot; value=&quot;${esc(rf.ref)}&quot; oninput=&quot;rf.ref=this.value&quot; style=&quot;width:100%;padding:10px;margin-top:8px&quot;&gt;
+  &lt;div class=&quot;act&quot;&gt;&lt;button class=&quot;btn&quot; onclick=&quot;marcarMapa()&quot;&gt;📍 ${rf.gps?&#x27;Punto marcado ✓&#x27;:&#x27;Marcar punto en el mapa&#x27;}&lt;/button&gt;&lt;/div&gt;
+  &lt;label class=&quot;meta&quot;&gt;Equipaje&lt;/label&gt;
+  &lt;div class=&quot;act&quot;&gt;${[[&#x27;mochila&#x27;,&#x27;🎒 Solo mochila&#x27;],[&#x27;carga&#x27;,&#x27;📦 Carga (+5 min)&#x27;],[&#x27;mucha&#x27;,&#x27;🍊 Mucha carga, fruta (+10 min)&#x27;]].map(e=&gt;`&lt;button class=&quot;btn&quot; ${rf.eq===e[0]?&#x27;style=&quot;outline:3px solid var(--gold)&quot;&#x27;:&#x27;&#x27;} onclick=&quot;rf.eq=&#x27;${e[0]}&#x27;;render()&quot;&gt;${e[1]}&lt;/button&gt;`).join(&#x27;&#x27;)}&lt;/div&gt;
+  &lt;label class=&quot;meta&quot;&gt;Pasajeros: &lt;b&gt;${rf.n}&lt;/b&gt;&lt;/label&gt; &lt;button class=&quot;btn&quot; onclick=&quot;rf.n=Math.max(1,rf.n-1);render()&quot;&gt;−&lt;/button&gt; &lt;button class=&quot;btn&quot; onclick=&quot;rf.n=Math.min(4,rf.n+1);render()&quot;&gt;+&lt;/button&gt;
+  &lt;article class=&quot;res&quot;&gt;&lt;b&gt;Adelanto para asegurar el recojo: ${rf.n*15} Bs&lt;/b&gt; &lt;span class=&quot;meta&quot;&gt;(la mitad del pasaje, monto de ejemplo)&lt;/span&gt;
+  &lt;div class=&quot;meta&quot;&gt;Si no estás en el punto, el adelanto queda para el chofer. Si cancelas hasta 1 h antes, se te devuelve.&lt;/div&gt;
+  &lt;div class=&quot;act&quot;&gt;&lt;button class=&quot;btn&quot; onclick=&quot;rf.pago=true;render();toast(&#x27;Pago QR recibido (demo)&#x27;)&quot;&gt;${rf.pago?&#x27;✓ Pagado con QR&#x27;:&#x27;Pagar con QR&#x27;}&lt;/button&gt;&lt;/div&gt;&lt;/article&gt;
+  &lt;div class=&quot;act&quot;&gt;&lt;button class=&quot;btn&quot; style=&quot;background:var(--red);color:#fff&quot; onclick=&quot;reservarRecojo()&quot; ${rf.pago&amp;&amp;!ya&amp;&amp;libres&gt;=rf.n?&#x27;&#x27;:&#x27;disabled&#x27;}&gt;Reservar recojo&lt;/button&gt;&lt;/div&gt;
+  ${mios.length?&#x27;&lt;h2&gt;Mis recojos&lt;/h2&gt;&#x27;+mios.map(r=&gt;`&lt;article class=&quot;res&quot;&gt;&lt;div class=&quot;res-top&quot;&gt;&lt;b&gt;${esc(r.com)}&lt;/b&gt;&lt;span class=&quot;meta&quot;&gt;${r.n} pas · ${r.eq}&lt;/span&gt;&lt;/div&gt;
+   &lt;div class=&quot;estado&quot;&gt;${r.st===&#x27;noshow&#x27;?&#x27;❌ No te presentaste: el móvil siguió&#x27;:r.st===&#x27;subio&#x27;?&#x27;✓ A bordo&#x27;:&#x27;Espera lista a los &#x27;+eta(r.com)+&#x27; min de la salida. El chofer espera de 2 a 5 min.&#x27;}&lt;/div&gt;
+   ${r.st===&#x27;espera&#x27;?`&lt;div class=&quot;act&quot;&gt;&lt;button class=&quot;btn&quot; onclick=&quot;yaEstoy(&#x27;${r.id}&#x27;)&quot;&gt;${r.aqui?&#x27;✓ Ubicación enviada&#x27;:&#x27;📍 Ya estoy aquí&#x27;}&lt;/button&gt;&lt;/div&gt;`:&#x27;&#x27;}&lt;/article&gt;`).join(&#x27;&#x27;):&#x27;&#x27;}`}
+function marcarMapa(){rf.gps={lat:-18.13,lng:-65.76};render();toast(&#x27;Punto de espera marcado (demo)&#x27;)}
+function reservarRecojo(){const a=recs();a.push({id:&#x27;k&#x27;+Date.now(),com:rf.com,ref:rf.ref,eq:rf.eq,n:rf.n,st:&#x27;espera&#x27;,mio:1,gps:rf.gps,adel:rf.n*15});
+  a.sort((x,y)=&gt;idx(x.com)-idx(y.com));setRecs(a);rf.pago=false;rf.ref=&#x27;&#x27;;render();toast(&#x27;Recojo reservado en &#x27;+rf.com+&#x27;. Te avisamos cuando el móvil salga del carril.&#x27;)}
+function yaEstoy(id){const a=recs();const r=a.find(x=&gt;x.id===id);r.aqui=1;setRecs(a);render();toast(&#x27;Tu ubicación real fue enviada al chofer&#x27;)}
+function demoSalida(){let s=salida();if(!s){s={t:Date.now(),extra:0};if(window.T21)T21.set(&#x27;salida12&#x27;,s);else window._sal=s;
+  recs().filter(r=&gt;r.mio&amp;&amp;r.st===&#x27;espera&#x27;).forEach(r=&gt;toast(&#x27;🚐 Tu móvil 12 salió del carril. Llega a &#x27;+r.com+&#x27; en unos &#x27;+eta(r.com)+&#x27; min&#x27;));}
+  else{s.extra=(s.extra||0)+10;if(window.T21)T21.set(&#x27;salida12&#x27;,s);else window._sal=s}render()}
+$(&#x27;#nv-ruta&#x27;).onclick=()=&gt;{vista=&#x27;ruta&#x27;;render();};
+window.addEventListener(&#x27;storage&#x27;,()=&gt;{if(vista===&#x27;ruta&#x27;)render()});
+
 $(&#x27;#nv-enc&#x27;).onclick=()=&gt;{vista=&#x27;enc&#x27;;ef={tipos:new Set()};render();};
 $(&#x27;#nv-res&#x27;).onclick=()=&gt;{vista=&#x27;res&#x27;;render();};
 $(&#x27;#sheetBg&#x27;).onclick=e=&gt;{if(e.target.id===&#x27;sheetBg&#x27;)cerrar();};
@@ -555,6 +619,10 @@ h2{font-size:16px;margin:0 0 10px}
 &lt;header&gt;&lt;div class=&quot;movil&quot;&gt;12&lt;/div&gt;&lt;div&gt;&lt;b&gt;Fermín Choque&lt;/b&gt;&lt;br&gt;&lt;small&gt;Toyota Hiace · 10 asientos · ★ 4,7&lt;/small&gt;&lt;/div&gt;&lt;/header&gt;
 &lt;main&gt;
 &lt;div id=&quot;aviso&quot;&gt;&lt;/div&gt;
+&lt;div class=&quot;card&quot;&gt;&lt;h2&gt;Solicitudes de viaje privado&lt;/h2&gt;&lt;div id=&quot;pvj&quot;&gt;&lt;/div&gt;&lt;p class=&quot;hint&quot;&gt;Te llega si eres el primero libre de la lista. Si no respondes en unos minutos, pasa al siguiente.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&quot;card&quot;&gt;&lt;h2&gt;Recojos en el camino · Torotoro → Cochabamba&lt;/h2&gt;&lt;div id=&quot;rcj&quot;&gt;&lt;/div&gt;
+&lt;div class=&quot;row&quot; style=&quot;margin-top:8px&quot;&gt;&lt;select id=&quot;rcCom&quot; style=&quot;padding:8px&quot;&gt;&lt;/select&gt; &lt;button class=&quot;btn&quot; onclick=&quot;subioCamino()&quot;&gt;+ Subió en el camino&lt;/button&gt;&lt;/div&gt;
+&lt;p class=&quot;hint&quot;&gt;Espera máxima en cada punto: de 2 a 5 minutos. Si no aparece ni contesta, marca &quot;No se presentó&quot;: el adelanto queda para ti.&lt;/p&gt;&lt;/div&gt;
 &lt;div class=&quot;card&quot;&gt;&lt;h2&gt;Mi turno — Terminal Torotoro&lt;/h2&gt;&lt;div class=&quot;big&quot; id=&quot;pos&quot;&gt;&lt;/div&gt;&lt;div class=&quot;hint&quot; id=&quot;posTxt&quot;&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;div class=&quot;card&quot;&gt;&lt;h2&gt;Salidas de madrugada (provisional)&lt;/h2&gt;&lt;div id=&quot;madru&quot;&gt;&lt;/div&gt;&lt;p class=&quot;hint&quot;&gt;Se conoce cuando sale el penúltimo. Si alguien toma un contrato, todos se recorren y la app avisa.&lt;/p&gt;&lt;/div&gt;
 &lt;div class=&quot;card&quot;&gt;&lt;h2&gt;Lista de turnos&lt;/h2&gt;&lt;div class=&quot;lista&quot; id=&quot;lista&quot;&gt;&lt;/div&gt;
@@ -662,6 +730,28 @@ function extra(){if(pasajeros.some(p=&gt;p.a===&#x27;Extra&#x27;&amp;&amp;p.st!=
  pasajeros.push({a:&#x27;Extra&#x27;,n:n+&#x27; — &#x27;+m,eq:&#x27;Liviano&#x27;,r:&#x27;Terminal&#x27;,st:&#x27;subio&#x27;});nota(&#x27;⚠ Asiento extra: &#x27;+n+&#x27; (&#x27;+m+&#x27;). Registrado como excepcional para el sindicato.&#x27;);render()}
 function sinReserva(){const n=prompt(&#x27;Nombre del pasajero&#x27;);if(!n)return;const usados=pasajeros.filter(p=&gt;p.st!==&#x27;nollego&#x27;).map(p=&gt;p.a);let a=1;while(usados.includes(a))a++;if(a&gt;10){alert(&#x27;Lleno&#x27;);return}pasajeros.push({a,n,eq:&#x27;Liviano&#x27;,r:&#x27;Terminal&#x27;,st:&#x27;subio&#x27;});nota(n+&#x27; anotado en asiento &#x27;+a);render()}
 function emergencia(){if(confirm(&#x27;¿Enviar EMERGENCIA con tu ubicación al sindicato y choferes cercanos?&#x27;)){nota(&#x27;🚨 Emergencia enviada con ubicación.&#x27;);alert(&#x27;Emergencia enviada. El sindicato y los choferes cercanos fueron avisados.&#x27;);render()}}
+
+const RK=[&#x27;Torotoro (pueblo)&#x27;,&#x27;Hacienda Loma&#x27;,&#x27;Sucusuma&#x27;,&#x27;Rancho Pampa&#x27;,&#x27;Calauta – puente&#x27;,&#x27;Calauta – comunidad&#x27;,&#x27;Calauta – campamento de Caminos&#x27;,&#x27;Chilcoma&#x27;,&#x27;Cruce Julo Grande&#x27;,&#x27;Julo Grande (desvío)&#x27;,&#x27;Julo Chico (desvío)&#x27;,&#x27;Tago Tago (desvío)&#x27;,&#x27;La Huerta&#x27;,&#x27;Taquimbala&#x27;,&#x27;Quirusmayo&#x27;,&#x27;Tayapaya&#x27;,&#x27;Caranota&#x27;];
+function rcGet(){return window.T21?T21.get(&#x27;recojos&#x27;,[]):[]}
+function rcSet(a){if(window.T21)T21.set(&#x27;recojos&#x27;,a);rcPintar()}
+function rcPintar(){const a=rcGet();const sel=document.getElementById(&#x27;rcCom&#x27;);if(!sel.options.length)sel.innerHTML=RK.map(x=&gt;&#x27;&lt;option&gt;&#x27;+x+&#x27;&lt;/option&gt;&#x27;).join(&#x27;&#x27;);
+ const ocup=10+a.filter(r=&gt;r.st!==&#x27;noshow&#x27;).reduce((s,r)=&gt;s+r.n,0);
+ document.getElementById(&#x27;rcj&#x27;).innerHTML=&#x27;&lt;div class=&quot;hint&quot;&gt;Asientos: &#x27;+ocup+&#x27; de 14 ocupados · &#x27;+(14-ocup)+&#x27; libres&lt;/div&gt;&#x27;+(a.length?a.map(r=&gt;`&lt;div style=&quot;padding:8px 0;border-top:1px solid #ccc&quot;&gt;&lt;b&gt;${r.com}&lt;/b&gt; · ${r.n} pas · ${r.eq===&#x27;mochila&#x27;?&#x27;🎒 mochila&#x27;:r.eq===&#x27;carga&#x27;?&#x27;📦 carga&#x27;:&#x27;🍊 mucha carga&#x27;}${r.camino?&#x27; · subió sin reserva&#x27;:&#x27;&#x27;}${r.adel?&#x27; · adelanto &#x27;+r.adel+&#x27; Bs&#x27;:&#x27;&#x27;}&lt;br&gt;&lt;span class=&quot;hint&quot;&gt;${r.ref||&#x27;&#x27;} ${r.aqui?&#x27;📍 Está en el punto (ubicación real)&#x27;:r.gps?&#x27;📍 Punto marcado&#x27;:&#x27;&#x27;}&lt;/span&gt;
+ ${r.st===&#x27;espera&#x27;?`&lt;div class=&quot;row&quot;&gt;&lt;button class=&quot;btn&quot; onclick=&quot;window.open(&#x27;https://maps.google.com/?q=-18.13,-65.76&#x27;)&quot;&gt;Ver en mapa&lt;/button&gt; &lt;button class=&quot;btn&quot; onclick=&quot;rcEst(&#x27;${r.id}&#x27;,&#x27;subio&#x27;)&quot;&gt;✓ Subió&lt;/button&gt; &lt;button class=&quot;btn am&quot; onclick=&quot;rcEst(&#x27;${r.id}&#x27;,&#x27;noshow&#x27;)&quot;&gt;No se presentó&lt;/button&gt;&lt;/div&gt;`:&#x27;&lt;div class=&quot;hint&quot;&gt;&#x27;+(r.st===&#x27;subio&#x27;?&#x27;✓ A bordo&#x27;:&#x27;❌ No se presentó&#x27;)+&#x27;&lt;/div&gt;&#x27;}&lt;/div&gt;`).join(&#x27;&#x27;):&#x27;&lt;div class=&quot;hint&quot;&gt;Sin recojos por ahora.&lt;/div&gt;&#x27;)}
+function rcEst(id,st){const a=rcGet();a.find(r=&gt;r.id===id).st=st;rcSet(a);nota(st===&#x27;subio&#x27;?&#x27;Pasajero a bordo&#x27;:&#x27;Marcado: no se presentó (adelanto queda para el chofer)&#x27;)}
+function subioCamino(){const com=document.getElementById(&#x27;rcCom&#x27;).value;const a=rcGet();a.push({id:&#x27;k&#x27;+Date.now(),com,eq:&#x27;mochila&#x27;,n:1,st:&#x27;subio&#x27;,camino:1});a.sort((x,y)=&gt;RK.indexOf(x.com)-RK.indexOf(y.com));rcSet(a);nota(&#x27;Pasajero sin reserva subió en &#x27;+com+&#x27;. La app ya descontó el asiento.&#x27;)}
+window.addEventListener(&#x27;storage&#x27;,rcPintar);
+const _rsync=window.t21Sync;window.t21Sync=function(){if(_rsync)_rsync();rcPintar()};
+rcPintar();
+
+function pvGet(){return window.T21?T21.get(&#x27;privados&#x27;,[]):[]}
+function pvPintar(){const a=pvGet().filter(x=&gt;x.movs&amp;&amp;(&#x27;Móvil &#x27;+x.movs[x.i])==MI);document.getElementById(&#x27;pvj&#x27;).innerHTML=a.length?a.map(x=&gt;`&lt;div style=&quot;padding:8px 0;border-top:1px solid #ccc&quot;&gt;&lt;b&gt;${x.de} → ${x.a}&lt;/b&gt; · ${x.f||&#x27;fecha a definir&#x27;} ${x.h} · ${x.n} pers.&lt;br&gt;&lt;span class=&quot;hint&quot;&gt;${x.rec==&#x27;Oficina&#x27;?&#x27;Sale de la oficina&#x27;:&#x27;Recoger en &#x27;+x.rec.toLowerCase()+&#x27;: &#x27;+(x.ref||&#x27;&#x27;)}&lt;/span&gt;
+ ${x.st==&#x27;buscando&#x27;?`&lt;div class=&quot;row&quot;&gt;&lt;button class=&quot;btn&quot; onclick=&quot;pvAcepta(&#x27;${x.id}&#x27;)&quot;&gt;Aceptar y poner precio&lt;/button&gt; &lt;button class=&quot;btn am&quot; onclick=&quot;pvPasa(&#x27;${x.id}&#x27;)&quot;&gt;No puedo&lt;/button&gt;&lt;/div&gt;`:&#x27;&lt;div class=&quot;hint&quot;&gt;&#x27;+(x.st==&#x27;precio&#x27;?&#x27;Esperando adelanto del cliente (&#x27;+x.precio+&#x27; Bs)&#x27;:x.st==&#x27;ok&#x27;?&#x27;✅ Confirmado: adelanto recibido en tu QR&#x27;:&#x27;&#x27;)+&#x27;&lt;/div&gt;&#x27;}&lt;/div&gt;`).join(&#x27;&#x27;):&#x27;&lt;div class=&quot;hint&quot;&gt;Sin solicitudes.&lt;/div&gt;&#x27;}
+function pvAcepta(id){const pr=+prompt(&#x27;Precio del viaje privado (Bs):&#x27;,&#x27;450&#x27;);if(!pr)return;const a=pvGet();const x=a.find(y=&gt;y.id==id);x.precio=pr;x.st=&#x27;precio&#x27;;T21.set(&#x27;privados&#x27;,a);nota(&#x27;Aceptaste el viaje privado por &#x27;+pr+&#x27; Bs. El cliente paga el adelanto a tu QR.&#x27;);pvPintar()}
+function pvPasa(id){const a=pvGet();const x=a.find(y=&gt;y.id==id);x.i++;if(x.i&gt;=x.movs.length)x.st=&#x27;nadie&#x27;;T21.set(&#x27;privados&#x27;,a);nota(&#x27;La solicitud pasó al siguiente chofer de la lista.&#x27;);pvPintar()}
+window.addEventListener(&#x27;storage&#x27;,pvPintar);
+const _rs2=window.t21Sync;window.t21Sync=function(){if(_rs2)_rs2();pvPintar()};
+pvPintar();
 revisarAviso();render();
 &lt;/script&gt;&lt;/body&gt;&lt;/html&gt;" style="display:none"></iframe>
 <iframe id="f_oficina" srcdoc="&lt;!DOCTYPE html&gt;
@@ -757,6 +847,46 @@ function vCon(){return `&lt;div class=&quot;card&quot;&gt;&lt;h2&gt;Móviles con
 function volver(k){const c=contratos.splice(k,1)[0];fila.push(c.m);ocup[c.m]=0;nota(&#x27;Móvil &#x27;+c.m+&#x27; volvió de contrato a &#x27;+OF[ofi]+&#x27;; se anotó al final de esa fila.&#x27;);render()}
 function vCal(){return `&lt;div class=&quot;card&quot;&gt;&lt;h2&gt;Calificaciones por móvil&lt;/h2&gt;&lt;table&gt;&lt;tr&gt;&lt;th&gt;Móvil&lt;/th&gt;&lt;th&gt;★&lt;/th&gt;&lt;th&gt;Votos&lt;/th&gt;&lt;th&gt;Lo bueno&lt;/th&gt;&lt;th&gt;Lo malo&lt;/th&gt;&lt;/tr&gt;${CAL.map(c=&gt;`&lt;tr&gt;&lt;td&gt;${c.m}&lt;/td&gt;&lt;td&gt;${c.e.toFixed(1).replace(&#x27;.&#x27;,&#x27;,&#x27;)}&lt;/td&gt;&lt;td&gt;${c.n}&lt;/td&gt;&lt;td&gt;${Object.entries(c.b).map(([k,v])=&gt;k+&#x27; &#x27;+v).join(&#x27;, &#x27;)||&#x27;—&#x27;}&lt;/td&gt;&lt;td style=&quot;color:${Object.keys(c.ma).length?&#x27;var(--rojo)&#x27;:&#x27;&#x27;}&quot;&gt;${Object.entries(c.ma).map(([k,v])=&gt;k+&#x27; &#x27;+v).join(&#x27;, &#x27;)||&#x27;—&#x27;}&lt;/td&gt;&lt;/tr&gt;`).join(&#x27;&#x27;)}&lt;/table&gt;&lt;p class=&quot;hint&quot;&gt;Se cuentan los botones que marcan los clientes. Las observaciones escritas se leen aparte.&lt;/p&gt;&lt;/div&gt;`;}
 function vLog(){return `&lt;div class=&quot;card&quot;&gt;&lt;h2&gt;Registro de todo lo que pasa&lt;/h2&gt;&lt;div class=&quot;log&quot;&gt;${log.map(l=&gt;`&lt;div&gt;${esc(l)}&lt;/div&gt;`).join(&#x27;&#x27;)}&lt;/div&gt;&lt;/div&gt;`;}
+
+/* ===== Reglas del carril, mucha gente y distritos ===== */
+let carrilDesde={tor:Date.now()-75*60000,cba:Date.now()-20*60000},carrilM={tor:null,cba:null},muchaGente=false,destino=&#x27;Cochabamba&#x27;;
+const DISTR=[&#x27;Añaguani&#x27;,&#x27;Pocosuco&#x27;,&#x27;Carasi&#x27;,&#x27;Poroma&#x27;];
+function minCarril(){if(carrilM[ofi]!==fila[0]){carrilM[ofi]=fila[0];if(carrilDesde[ofi]==null)carrilDesde[ofi]=Date.now()}return Math.floor((Date.now()-carrilDesde[ofi])/60000)}
+function vReglas(){const m=fila[0],mins=minCarril(),pas=ocup[m]||0,cap14=cap(m),rest=120-mins;
+ const hoy=new Date().getDay(),fijaHoy=ofi==&#x27;tor&#x27;&amp;&amp;[1,5,6].includes(hoy);
+ let est,col;
+ if(muchaGente){est=pas&gt;=cap14?&#x27;Lleno: sale ahora&#x27;:&#x27;🎉 Día de mucha gente: puede esperar a llenar (&#x27;+pas+&#x27; de &#x27;+cap14+&#x27;)&#x27;;col=&#x27;#2E6B3E&#x27;}
+ else if(pas&gt;=10){est=&#x27;✅ Ya tiene &#x27;+pas+&#x27;: debe salir (si en ~5 min suben más, no hay problema)&#x27;;col=&#x27;#2E6B3E&#x27;}
+ else if(rest&lt;=0){est=&#x27;⛔ Se cumplieron las 2 horas: DEBE SALIR AHORA con &#x27;+pas+&#x27; pasajero(s)&#x27;;col=&#x27;#c62828&#x27;}
+ else if(rest&lt;=15){est=&#x27;⚠️ Faltan &#x27;+rest+&#x27; min para las 2 horas: avisado al chofer&#x27;;col=&#x27;#E0A417&#x27;}
+ else{est=&#x27;Esperando pasajeros: &#x27;+pas+&#x27; de 10 mínimo · quedan &#x27;+Math.floor(rest/60)+&#x27; h &#x27;+(rest%60)+&#x27; min&#x27;;col=&#x27;&#x27;}
+ return `&lt;div class=&quot;card&quot;&gt;&lt;h2&gt;Reglas del carril&lt;/h2&gt;
+ ${fijaHoy?&#x27;&lt;p class=&quot;hint&quot;&gt;🕕 Hoy hay salida fija a las 6:00 desde Torotoro (lunes, viernes y sábado; faltan confirmar otros días).&lt;/p&gt;&#x27;:&#x27;&#x27;}
+ &lt;p&gt;Móvil ${m} en el carril hace &lt;b&gt;${Math.floor(mins/60)} h ${mins%60} min&lt;/b&gt; (máximo 2 horas).&lt;/p&gt;
+ &lt;p style=&quot;font-weight:600;color:${col}&quot;&gt;${est}&lt;/p&gt;
+ &lt;div class=&quot;row&quot;&gt;&lt;button class=&quot;btn no&quot; onclick=&quot;carrilDesde[ofi]-=30*60000;render()&quot;&gt;Demo: +30 min&lt;/button&gt;
+ &lt;button class=&quot;btn ${muchaGente?&#x27;ok&#x27;:&#x27;am&#x27;}&quot; onclick=&quot;togMucha()&quot;&gt;${muchaGente?&#x27;Quitar día de mucha gente&#x27;:&#x27;Activar día de mucha gente&#x27;}&lt;/button&gt;&lt;/div&gt;
+ &lt;p class=&quot;hint&quot;&gt;El día de mucha gente (fiestas, eventos) solo lo activa el secretario de transporte: la app no obliga a salir con 10 y se espera a llenar hasta la capacidad, pero el límite de 2 horas sigue valiendo. Los demás días sale con 10.&lt;/p&gt;
+ &lt;label class=&quot;hint&quot;&gt;Destino de esta salida:&lt;/label&gt; &lt;select onchange=&quot;destino=this.value&quot; style=&quot;padding:8px&quot;&gt;${(ofi==&#x27;tor&#x27;?[&#x27;Cochabamba&#x27;]:[&#x27;Torotoro&#x27;,...DISTR]).map(d=&gt;`&lt;option ${d==destino?&#x27;selected&#x27;:&#x27;&#x27;}&gt;${d}&lt;/option&gt;`).join(&#x27;&#x27;)}&lt;/select&gt;
+ &lt;p class=&quot;hint&quot;&gt;Las salidas a distritos usan el turno normal de la lista; al pasar por Torotoro se anotan en la oficina.&lt;/p&gt;
+ ${ofi==&#x27;tor&#x27;?`&lt;div class=&quot;row&quot; style=&quot;margin-top:8px&quot;&gt;&lt;select id=&quot;dMov&quot; style=&quot;padding:8px&quot;&gt;${Object.keys(MOV).filter(x=&gt;!fila.includes(+x)).sort((a,b)=&gt;(enDist[b]?1:0)-(enDist[a]?1:0)).map(x=&gt;`&lt;option&gt;${x}${enDist[x]?&#x27; (en &#x27;+enDist[x].d+&#x27;)&#x27;:&#x27;&#x27;}&lt;/option&gt;`).join(&#x27;&#x27;)}&lt;/select&gt;&lt;select id=&quot;dDe&quot; style=&quot;padding:8px&quot;&gt;${DISTR.map(d=&gt;`&lt;option&gt;${d}&lt;/option&gt;`).join(&#x27;&#x27;)}&lt;/select&gt;&lt;button class=&quot;btn az&quot; onclick=&quot;llegoDistrito()&quot;&gt;Llegó de distrito&lt;/button&gt;&lt;/div&gt;
+ &lt;p class=&quot;hint&quot;&gt;El que vuelve del distrito entra primero al carril y todos retroceden un puesto. Sus pasajeros del carril pasan a los asientos libres en orden de reserva; los que no caben se quedan en el que pasó a segundo. (Provisional: por confirmar con el sindicato.)&lt;/p&gt;`:&#x27;&#x27;}&lt;/div&gt;`}
+function togMucha(){if(!muchaGente){const q=prompt(&#x27;Solo el secretario de transporte. Escribe su nombre para autorizar:&#x27;,&#x27;Secretario de transporte&#x27;);if(!q)return;muchaGente=true;nota(&#x27;Día de mucha gente activado por &#x27;+q+&#x27;.&#x27;)}else{muchaGente=false;nota(&#x27;Día de mucha gente desactivado.&#x27;)}render()}
+function llegoDistrito(){const m=parseInt(document.getElementById(&#x27;dMov&#x27;).value),de=document.getElementById(&#x27;dDe&#x27;).value;
+ const traen=+prompt(&#x27;¿Cuántos asientos ya vienen ocupados desde &#x27;+de+&#x27;?&#x27;,&#x27;6&#x27;);if(isNaN(traen))return;
+ const prev=fila[0],tenia=ocup[prev]||0,c=cap(m),libres=Math.max(0,c-traen),pasan=Math.min(tenia,libres);
+ fila.unshift(m);ocup[m]=traen+pasan;ocup[prev]=tenia-pasan;carrilDesde[ofi]=Date.now();carrilM[ofi]=m;
+ nota(&#x27;Móvil &#x27;+m+&#x27; llegó de &#x27;+de+&#x27; con &#x27;+traen+&#x27; pasajeros y entró al carril. Todos retroceden un puesto. &#x27;+pasan+&#x27; pasajero(s) del móvil &#x27;+prev+&#x27; pasaron al &#x27;+m+(tenia-pasan?&#x27;; &#x27;+(tenia-pasan)+&#x27; se quedan en el &#x27;+prev:&#x27;&#x27;)+&#x27;. Se avisó a cada pasajero su nuevo móvil y asiento.&#x27;);render()}
+const _vFila=vFila;vFila=function(){return vReglas()+_vFila()};
+const _desp=despachar;despachar=function(){const m=fila[0],antes=fila.length;_desp();if(fila.length&lt;antes){carrilDesde[ofi]=Date.now();carrilM[ofi]=fila[0];if(destino!==&#x27;Cochabamba&#x27;&amp;&amp;destino!==&#x27;Torotoro&#x27;)nota(&#x27;Móvil &#x27;+m+&#x27; salió hacia el distrito &#x27;+destino+&#x27;.&#x27;);if(ofi==&#x27;tor&#x27;&amp;&amp;m==12&amp;&amp;window.T21)T21.set(&#x27;salida12&#x27;,{t:Date.now(),extra:0});render()}};
+
+let enDist={25:{d:&#x27;Poroma&#x27;,h:&#x27;05:40&#x27;}};
+function anotarPaso(){const m=+document.getElementById(&#x27;pMov&#x27;).value,d=document.getElementById(&#x27;pDe&#x27;).value;enDist[m]={d,h:new Date().toTimeString().slice(0,5)};nota(&#x27;Móvil &#x27;+m+&#x27; anotado de paso hacia &#x27;+d+&#x27;. Queda &quot;En distrito&quot; sin perder su lugar.&#x27;);render()}
+function vDist(){if(ofi!=&#x27;tor&#x27;)return &#x27;&#x27;;const e=Object.entries(enDist);return `&lt;div class=&quot;card&quot;&gt;&lt;h2&gt;Móviles en distrito&lt;/h2&gt;${e.map(([m,x])=&gt;`&lt;div class=&quot;it&quot;&gt;&lt;span&gt;Móvil ${m} · ${esc(MOV[m].ch)}&lt;/span&gt;&lt;span class=&quot;tag&quot;&gt;En distrito: ${x.d} · pasó ${x.h}&lt;/span&gt;&lt;/div&gt;`).join(&#x27;&#x27;)||&#x27;&lt;p class=&quot;hint&quot;&gt;Ninguno.&lt;/p&gt;&#x27;}
+&lt;div class=&quot;row&quot; style=&quot;margin-top:8px&quot;&gt;&lt;select id=&quot;pMov&quot; style=&quot;padding:8px&quot;&gt;${Object.keys(MOV).filter(x=&gt;!enDist[x]&amp;&amp;!fila.includes(+x)).map(x=&gt;`&lt;option&gt;${x}&lt;/option&gt;`).join(&#x27;&#x27;)}&lt;/select&gt;&lt;select id=&quot;pDe&quot; style=&quot;padding:8px&quot;&gt;${DISTR.map(d=&gt;`&lt;option&gt;${d}&lt;/option&gt;`).join(&#x27;&#x27;)}&lt;/select&gt;&lt;button class=&quot;btn no&quot; onclick=&quot;anotarPaso()&quot;&gt;Anotar de paso a distrito&lt;/button&gt;&lt;/div&gt;
+&lt;p class=&quot;hint&quot;&gt;El chofer escanea el QR al pasar por la oficina o lo anota la secretaria.&lt;/p&gt;&lt;/div&gt;`}
+const _vF2=vFila;vFila=function(){return _vF2()+vDist()};
+const _lle=llegoDistrito;llegoDistrito=function(){const m=parseInt(document.getElementById(&#x27;dMov&#x27;).value);_lle();if(fila[0]===m)delete enDist[m];render()};
 render();
 &lt;/script&gt;&lt;/body&gt;&lt;/html&gt;" style="display:none"></iframe>
 <iframe id="f_directiva" srcdoc="&lt;!DOCTYPE html&gt;&lt;html lang=&quot;es&quot;&gt;&lt;head&gt;&lt;script&gt;
